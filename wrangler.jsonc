@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "studiojuai-insurance",
+  "compatibility_date": "2025-11-11",
+  "pages_build_output_dir": "./dist",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "studiojuai-production",
+      "database_id": "bbb5a632-10a7-4b1e-ba0e-12f945fa9107"
+    }
+  ]
+}

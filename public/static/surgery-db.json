@@ -1,0 +1,62 @@
+[
+  {
+    "code": "S5061",
+    "name": "백내장 수술",
+    "category": "안과",
+    "description": "수정체 혼탁으로 인한 시력 저하를 개선하기 위한 수술"
+  },
+  {
+    "code": "S5060",
+    "name": "녹내장 수술",
+    "category": "안과",
+    "description": "안압 상승으로 인한 시신경 손상을 예방하기 위한 수술"
+  },
+  {
+    "code": "Q2861",
+    "name": "충수절제술",
+    "category": "소화기",
+    "description": "맹장염(충수염) 치료를 위한 충수 절제 수술"
+  },
+  {
+    "code": "Q2862",
+    "name": "복강경 충수절제술",
+    "category": "소화기",
+    "description": "복강경을 이용한 충수 절제 수술"
+  },
+  {
+    "code": "S4642",
+    "name": "제왕절개 분만",
+    "category": "산부인과",
+    "description": "복부 절개를 통한 분만"
+  },
+  {
+    "code": "Q0101",
+    "name": "위내시경검사",
+    "category": "소화기",
+    "description": "위와 십이지장을 내시경으로 관찰하는 검사"
+  },
+  {
+    "code": "Q2772",
+    "name": "담낭절제술",
+    "category": "소화기",
+    "description": "담낭(쓸개) 제거 수술"
+  },
+  {
+    "code": "Q2773",
+    "name": "복강경 담낭절제술",
+    "category": "소화기",
+    "description": "복강경을 이용한 담낭 제거 수술"
+  },
+  {
+    "code": "S4641",
+    "name": "자연분만",
+    "category": "산부인과",
+    "description": "자연적인 질식 분만"
+  },
+  {
+    "code": "Q2851",
+    "name": "치질 수술",
+    "category": "항문외과",
+    "description": "치핵(치질) 제거 수술"
+  }
+]

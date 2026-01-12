@@ -1,0 +1,470 @@
+/* STUDIO_JU_AI - 보험 수술비 특약 분석 시스템 */
+
+/* ========================================
+   ❶ 기본 반응형 설정
+   ======================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* 색상 팔레트 */
+  --primary-color: #03C75A;
+  --secondary-color: #2563eb;
+  --background-light: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  
+  /* 타이포그래피 - PC */
+  --font-size-base: 16px;
+  --line-height-base: 1.6;
+  --letter-spacing: -0.01em;
+  
+  /* 간격 */
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* 최대 너비 */
+  --max-width-desktop: 720px;
+  --max-width-mobile: 100%;
+}
+
+/* ========================================
+   ❷ 모바일 우선 (Mobile First)
+   ======================================== */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  background-color: var(--background-light);
+  padding: var(--spacing-md);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   ❸ PC 반응형 (@media 최소 768px)
+   ======================================== */
+
+@media (min-width: 768px) {
+  body {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing);
+    padding: 40px 60px;
+  }
+  
+  .container {
+    max-width: var(--max-width-desktop);
+    margin: 0 auto;
+  }
+  
+  .content-section {
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+  }
+}
+
+/* ========================================
+   ❹ 타이포그래피 계층
+   ======================================== */
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-primary);
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+p {
+  margin-bottom: var(--spacing-md);
+  line-height: 1.7;
+}
+
+/* ========================================
+   ❺ 이모지 + 넘버링 스타일
+   ======================================== */
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  margin-right: var(--spacing-sm);
+}
+
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 6px 12px;
+  background: var(--background-light);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   ❻ 카드 컴포넌트
+   ======================================== */
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+  }
+}
+
+/* ========================================
+   ❼ 버튼 스타일
+   ======================================== */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--primary-color), #00A84C);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(3, 199, 90, 0.3);
+}
+
+.btn-secondary {
+  padding: 10px 20px;
+  background: white;
+  color: var(--secondary-color);
+  border: 2px solid var(--secondary-color);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--secondary-color);
+  color: white;
+}
+
+/* ========================================
+   ❽ 리스트 스타일
+   ======================================== */
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.7;
+}
+
+ul li::before {
+  content: '•';
+  position: absolute;
+  left: 8px;
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 20px;
+}
+
+/* ========================================
+   ❾ 테이블 반응형
+   ======================================== */
+
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: var(--spacing-lg) 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  table {
+    font-size: 15px;
+  }
+}
+
+thead {
+  background: var(--background-light);
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ========================================
+   ❿ 푸터 스타일
+   ======================================== */
+
+.footer {
+  margin-top: 80px;
+  padding: var(--spacing-xl) 0;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.footer-logo {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: var(--spacing-md);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: var(--primary-color);
+}
+
+/* ========================================
+   ⓫ 애니메이션
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ========================================
+   ⓬ 유틸리티 클래스
+   ======================================== */
+
+.text-center {
+  text-align: center;
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-secondary {
+  color: var(--secondary-color);
+}
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+}
+
+.mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
+
+.p-lg {
+  padding: var(--spacing-lg);
+}
+
+/* ========================================
+   ⓭ 다크모드 (수동 전환) - 심플 버전
+   ======================================== */
+
+body.dark-mode {
+  background-color: #000000 !important;
+}
+
+/* 텍스트만 흰색으로 */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode p,
+body.dark-mode span,
+body.dark-mode div,
+body.dark-mode label {
+  color: #ffffff !important;
+}
+
+/* 배경이 있는 카드/섹션 - 약간 회색으로 */
+body.dark-mode .bg-white,
+body.dark-mode .bg-gray-50,
+body.dark-mode .bg-gradient-to-r,
+body.dark-mode .bg-gradient-to-br {
+  background: #1a1a1a !important;
+}
+
+/* 입력 필드 */
+body.dark-mode input,
+body.dark-mode textarea {
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
+  border-color: #444444 !important;
+}
+
+/* 버튼은 원래 색상 유지 (색상 변경 안 함) */
+body.dark-mode button {
+  /* 버튼의 배경색과 텍스트는 그대로 유지 */
+}
+
+/* 헤더 */
+body.dark-mode header {
+  background-color: #1a1a1a !important;
+  border-bottom-color: #333333 !important;
+}
+
+/* 푸터 */
+body.dark-mode footer,
+body.dark-mode .footer {
+  background-color: #000000 !important;
+  border-top-color: #333333 !important;
+}
+
+body.dark-mode .footer-links a {
+  color: #ffffff !important;
+}
+
+/* 검색 결과 모달 다크모드 */
+body.dark-mode .fixed .bg-white {
+  background-color: #1a1a1a !important;
+}
+
+/* 검색 결과 카드 */
+body.dark-mode .border.rounded-lg {
+  background-color: #2a2a2a !important;
+  border-color: #404040 !important;
+}
+
+/* 텍스트 색상 유지 (gray계열) */
+body.dark-mode .text-gray-700,
+body.dark-mode .text-gray-600,
+body.dark-mode .text-gray-900 {
+  color: #e5e5e5 !important;
+}
+
+/* 배경색이 있는 정보 박스들 */
+body.dark-mode .bg-gray-50 {
+  background-color: #2a2a2a !important;
+}
+
+body.dark-mode .bg-green-50 {
+  background-color: #1a3a2a !important;
+}
+
+body.dark-mode .bg-purple-50 {
+  background-color: #2a1a3a !important;
+}
+
+body.dark-mode .bg-yellow-50 {
+  background-color: #3a3a1a !important;
+}
+
+body.dark-mode .bg-blue-50 {
+  background-color: #1a2a3a !important;
+}
+
+body.dark-mode .bg-red-50 {
+  background-color: #3a1a1a !important;
+}
+
+/* 보더 색상 */
+body.dark-mode .border-b {
+  border-color: #404040 !important;
+}
+
+/* 흰색 배경 카드들 (고객 상담 포인트 등) */
+body.dark-mode .p-2.bg-white,
+body.dark-mode .p-3.bg-white {
+  background-color: #333333 !important;
+}
+}
