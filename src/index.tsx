@@ -20,6 +20,15 @@ const app = new Hono<{ Bindings: Bindings }>()
 // CORS 설정
 app.use('/api/*', cors())
 
+// 관리자 API 비밀번호 보호
+app.use('/api/admin/*', async (c, next) => {
+  const pw = c.req.header('X-Admin-Password') || c.req.query('pw')
+  if (pw !== 'xivix2026') {
+    return c.json({ error: '관리자 인증이 필요합니다' }, 401)
+  }
+  await next()
+})
+
 // 정적 파일 제공
 app.use('/static/*', serveStatic({ root: './public' }))
 
@@ -542,247 +551,237 @@ app.get('/', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>STUDIO JU AI - 보험 수술비 특약 분석</title>
+        <title>보험스캔 - ICD-10 진단코드 검색 + 의료영상 AI 판독</title>
+        <meta name="description" content="ICD-10 진단코드 검색, 11개 보험사 수술비 특약 비교, 의료영상 AI 판독(교육용)을 하나의 사이트에서 제공합니다.">
+        <meta property="og:title" content="보험스캔">
+        <meta property="og:description" content="ICD-10 진단코드 검색 + 의료영상 AI 판독">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://studiojuai-insurance.pages.dev">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2300C853'/><text x='50' y='68' font-size='55' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>스</text></svg>">
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
         <script>
           tailwind.config = {
             theme: {
               extend: {
                 fontFamily: {
-                  sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                  sans: ['Pretendard Variable', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
                 },
                 colors: {
-                  primary: '#03C75A',
-                  dark: '#0a0a0a',
+                  primary: '#00C853',
                 }
               }
             }
           }
         </script>
         <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          
-          html {
-            scroll-behavior: smooth;
+          :root {
+            --bg: #FAFAF8;
+            --card: #FFFFFF;
+            --card-border: rgba(0,0,0,0.06);
+            --text-1: #111111;
+            --text-2: #333333;
+            --text-3: #666666;
+            --green: #00C853;
+            --green-light: #69F0AE;
+            --red: #dc2626;
           }
-          
+          [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --card: #111111;
+            --card-border: rgba(255,255,255,0.06);
+            --text-1: #FFFFFF;
+            --text-2: #E0E0E0;
+            --text-3: #999999;
+          }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          html { scroll-behavior: smooth; }
           body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0a0a0a;
-            color: #ffffff;
+            font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text-1);
             overflow-x: hidden;
           }
-          
-          /* Hero gradient background */
+          .t1 { color: var(--text-1); }
+          .t2 { color: var(--text-2); }
+          .t3 { color: var(--text-3); }
+          .container-main { max-width: 1100px; margin: 0 auto; }
           .hero-gradient {
-            background: linear-gradient(180deg, #0a0a0a 0%, #111827 50%, #0a0a0a 100%);
+            background: linear-gradient(180deg, var(--bg) 0%, #f0f0ee 50%, var(--bg) 100%);
             position: relative;
           }
-          
           .hero-gradient::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 1200px;
-            height: 100%;
-            background: radial-gradient(ellipse at center top, rgba(3, 199, 90, 0.15) 0%, transparent 60%);
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 1200px; height: 100%;
+            background: radial-gradient(ellipse at center top, rgba(0,200,83,0.08) 0%, transparent 60%);
             pointer-events: none;
           }
-          
-          /* Glassmorphism card */
-          .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
+          [data-theme="dark"] .hero-gradient {
+            background: linear-gradient(180deg, #0a0a0a 0%, #111827 50%, #0a0a0a 100%);
           }
-          
-          /* Search input glow */
+          [data-theme="dark"] .hero-gradient::before {
+            background: radial-gradient(ellipse at center top, rgba(0,200,83,0.15) 0%, transparent 60%);
+          }
+          .glass-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+          }
+          [data-theme="dark"] .glass-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(20px);
+            box-shadow: none;
+          }
           .search-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #F5F5F5;
+            border: 1px solid rgba(0,0,0,0.08);
+            color: var(--text-1);
             transition: all 0.3s ease;
           }
-          
+          .search-input::placeholder { color: var(--text-3); }
           .search-input:focus {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: #03C75A;
-            box-shadow: 0 0 0 4px rgba(3, 199, 90, 0.15);
+            background: #FFFFFF;
+            border-color: var(--green);
+            box-shadow: 0 0 0 4px rgba(0,200,83,0.12);
             outline: none;
           }
-          
-          /* Primary button */
-          .btn-primary {
-            background: linear-gradient(135deg, #03C75A 0%, #00A84C 100%);
-            transition: all 0.3s ease;
+          [data-theme="dark"] .search-input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
           }
-          
+          [data-theme="dark"] .search-input:focus {
+            background: rgba(255,255,255,0.08);
+          }
+          .btn-primary {
+            background: linear-gradient(135deg, #00C853 0%, #00A844 100%);
+            transition: all 0.3s ease;
+            min-height: 44px;
+          }
           .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(3, 199, 90, 0.4);
+            box-shadow: 0 8px 30px rgba(0,200,83,0.3);
           }
-          
-          /* Feature card hover */
+          .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+          }
           .feature-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: var(--card);
+            border: 1px solid var(--card-border);
             transition: all 0.3s ease;
           }
-          
           .feature-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(3, 199, 90, 0.3);
+            border-color: rgba(0,200,83,0.3);
             transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
           }
-          
-          /* Stats counter animation */
+          [data-theme="dark"] .feature-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+          }
+          [data-theme="dark"] .feature-card:hover {
+            background: rgba(255,255,255,0.05);
+            box-shadow: none;
+          }
+          .result-card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+          }
+          [data-theme="dark"] .result-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: none;
+          }
+          .badge {
+            background: linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(0,200,83,0.05) 100%);
+            border: 1px solid rgba(0,200,83,0.2);
+          }
+          .tab-btn {
+            min-height: 44px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+          }
+          .tab-btn.active {
+            background: var(--green) !important;
+            color: #FFFFFF !important;
+          }
+          .tab-btn:not(.active) {
+            background: rgba(0,0,0,0.04);
+            color: var(--text-3);
+          }
+          .tab-btn:not(.active):hover {
+            background: rgba(0,0,0,0.08);
+          }
+          [data-theme="dark"] .tab-btn:not(.active) {
+            background: rgba(255,255,255,0.05);
+          }
+          [data-theme="dark"] .tab-btn:not(.active):hover {
+            background: rgba(255,255,255,0.1);
+          }
+          .chip { min-height: 44px; display: inline-flex; align-items: center; }
+          .upload-area {
+            border: 2px dashed var(--card-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+          }
+          .upload-area:hover, .upload-area.dragover {
+            border-color: var(--green);
+            background: rgba(0,200,83,0.05);
+          }
           @keyframes countUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
           }
-          
-          .stat-number {
-            animation: countUp 0.6s ease-out forwards;
-          }
-          
-          /* Fade in animation */
+          .stat-number { animation: countUp 0.6s ease-out forwards; }
           @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
           }
-          
-          .fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-          }
-          
-          /* Result card */
-          .result-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-          }
-          
-          /* Scrollbar styling */
-          ::-webkit-scrollbar {
-            width: 8px;
-          }
-          
-          ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-          }
-          
-          ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-          }
-          
-          ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-          }
-          
-          /* Loading spinner */
+          .fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
           .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #03C75A;
+            border: 3px solid rgba(0,200,83,0.2);
+            border-top-color: var(--green);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             animation: spin 0.8s linear infinite;
           }
-          
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-          
-          /* Suggestion dropdown */
-          .suggestion-item {
-            transition: all 0.2s ease;
-          }
-          
-          .suggestion-item:hover {
-            background: rgba(3, 199, 90, 0.1);
-          }
-          
-          /* Badge */
-          .badge {
-            background: linear-gradient(135deg, rgba(3, 199, 90, 0.2) 0%, rgba(3, 199, 90, 0.1) 100%);
-            border: 1px solid rgba(3, 199, 90, 0.3);
-          }
-          
-          /* Mobile responsive */
+          @keyframes spin { to { transform: rotate(360deg); } }
+          .suggestion-item { transition: all 0.2s ease; }
+          .suggestion-item:hover { background: rgba(0,200,83,0.1); }
+          ::-webkit-scrollbar { width: 8px; }
+          ::-webkit-scrollbar-track { background: rgba(0,0,0,0.02); }
+          ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+          [data-theme="dark"] ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+          [data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
           @media (max-width: 768px) {
-            .hero-title {
-              font-size: 2rem !important;
-              line-height: 1.2 !important;
-            }
-            .hero-subtitle {
-              font-size: 1rem !important;
-            }
+            .hero-title { font-size: 2rem !important; line-height: 1.2 !important; }
+            .hero-subtitle { font-size: 1rem !important; }
           }
-          
-          /* Light mode support */
-          body.light-mode {
-            background: #f8fafc;
-            color: #1e293b;
-          }
-          
-          body.light-mode .hero-gradient {
-            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 50%, #f8fafc 100%);
-          }
-          
-          body.light-mode .hero-gradient::before {
-            background: radial-gradient(ellipse at center top, rgba(3, 199, 90, 0.1) 0%, transparent 60%);
-          }
-          
-          body.light-mode .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-          }
-          
-          body.light-mode .search-input {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            color: #1e293b;
-          }
-          
-          body.light-mode .feature-card {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-          }
-          
-          body.light-mode .result-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-          }
-          
-          body.light-mode .text-white { color: #1e293b !important; }
-          body.light-mode .text-gray-300 { color: #64748b !important; }
-          body.light-mode .text-gray-400 { color: #94a3b8 !important; }
-          body.light-mode .text-gray-500 { color: #64748b !important; }
         </style>
     </head>
     <body class="min-h-screen">
         <!-- Navigation -->
-        <nav class="fixed top-0 left-0 right-0 z-50 px-4 py-4">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <nav class="fixed top-0 left-0 right-0 z-50 px-4 py-4" style="background: var(--bg); border-bottom: 1px solid var(--card-border);">
+            <div class="container-main flex items-center justify-between">
                 <a href="/" class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center">
-                        <i class="fas fa-shield-heart text-white text-lg"></i>
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: #00C853;">
+                        <span class="text-white font-bold text-lg">스</span>
                     </div>
-                    <span class="text-xl font-bold text-white">STUDIO JU AI</span>
+                    <span class="text-xl font-bold t1">보험스캔</span>
                 </a>
                 <div class="flex items-center gap-4">
-                    <button onclick="toggleTheme()" class="w-10 h-10 rounded-full glass-card flex items-center justify-center hover:bg-white/10 transition-colors">
-                        <i id="themeIcon" class="fas fa-sun text-gray-300"></i>
+                    <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style="border: 1px solid var(--card-border);">
+                        <i id="themeIcon" class="fas fa-moon t3"></i>
                     </button>
-                    <button onclick="showAdminPanel()" class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full glass-card text-gray-300 hover:text-white hover:bg-white/10 transition-all text-sm">
+                    <button onclick="showAdminPanel()" class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full t3 transition-all text-sm" style="border: 1px solid var(--card-border);">
                         <i class="fas fa-cog"></i>
                         <span>관리자</span>
                     </button>
@@ -792,45 +791,55 @@ app.get('/', (c) => {
 
         <!-- Hero Section -->
         <section class="hero-gradient min-h-screen flex items-center justify-center px-4 pt-20 pb-16">
-            <div class="max-w-5xl mx-auto text-center">
+            <div class="container-main text-center">
                 <!-- Badge -->
                 <div class="inline-flex items-center gap-2 badge rounded-full px-4 py-2 mb-8 fade-in-up">
                     <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    <span class="text-sm text-primary font-medium">AI 기반 보험 분석 시스템</span>
+                    <span class="text-sm font-medium" style="color: var(--green);">AI 기반 보험 분석 + 의료영상 판독</span>
                 </div>
-                
+
                 <!-- Hero Title -->
-                <h1 class="hero-title text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight fade-in-up" style="animation-delay: 0.1s">
-                    보험 수술비 특약<br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">AI 분석 시스템</span>
+                <h1 class="hero-title text-4xl md:text-6xl lg:text-7xl font-black t1 mb-6 leading-tight fade-in-up" style="animation-delay: 0.1s">
+                    보험스캔<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">진단코드 + 영상판독</span>
                 </h1>
-                
+
                 <!-- Hero Subtitle -->
-                <p class="hero-subtitle text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto fade-in-up" style="animation-delay: 0.2s">
-                    진단코드와 수술명을 입력하면 AI가 11개 보험사의<br class="hidden md:block">
-                    1-5종 수술비 특약과 N대 수술비를 자동 분석합니다
+                <p class="hero-subtitle text-lg md:text-xl t3 mb-12 max-w-2xl mx-auto fade-in-up" style="animation-delay: 0.2s">
+                    ICD-10 진단코드 검색, 11개 보험사 특약 비교,<br class="hidden md:block">
+                    의료영상 AI 판독(교육용)을 한곳에서
                 </p>
-                
-                <!-- Search Section -->
-                <div class="glass-card p-6 md:p-8 max-w-3xl mx-auto fade-in-up" style="animation-delay: 0.3s">
-                    <!-- Tab Buttons -->
+
+                <!-- Main Tab Buttons -->
+                <div class="flex gap-3 max-w-3xl mx-auto mb-6 fade-in-up" style="animation-delay: 0.25s">
+                    <button id="mainTabDiagnosis" onclick="switchMainTab('diagnosis')" class="tab-btn active flex-1 py-3 px-4 rounded-xl text-sm font-semibold">
+                        <i class="fas fa-stethoscope mr-2"></i>진단코드 검색
+                    </button>
+                    <button id="mainTabImaging" onclick="switchMainTab('imaging')" class="tab-btn flex-1 py-3 px-4 rounded-xl text-sm font-semibold">
+                        <i class="fas fa-x-ray mr-2"></i>영상판독(교육용)
+                    </button>
+                </div>
+
+                <!-- Diagnosis Search Section -->
+                <div id="diagnosisSection" class="glass-card p-6 md:p-8 max-w-3xl mx-auto fade-in-up" style="animation-delay: 0.3s">
+                    <!-- Sub-Tab Buttons -->
                     <div class="flex gap-2 mb-6">
-                        <button id="tabICD" onclick="switchTab('icd')" class="flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all bg-primary text-white">
-                            <i class="fas fa-stethoscope mr-2"></i>ICD-10 진단코드
+                        <button id="tabICD" onclick="switchTab('icd')" class="tab-btn active flex-1 py-3 px-4 rounded-xl text-sm font-semibold">
+                            <i class="fas fa-search mr-2"></i>ICD-10 진단코드
                         </button>
-                        <button id="tabAI" onclick="switchTab('ai')" class="flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all bg-white/5 text-gray-400 hover:bg-white/10">
+                        <button id="tabAI" onclick="switchTab('ai')" class="tab-btn flex-1 py-3 px-4 rounded-xl text-sm font-semibold">
                             <i class="fas fa-robot mr-2"></i>AI 보험 분석
                         </button>
                     </div>
-                    
+
                     <!-- ICD Search -->
                     <div id="icdSearch" class="space-y-4">
                         <div class="relative">
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 id="dbSearchInput"
                                 placeholder="예: 백내장, H25, 심근경색, I21, 뇌경색"
-                                class="search-input w-full px-6 py-5 rounded-2xl text-white text-lg placeholder-gray-500"
+                                class="search-input w-full px-6 py-5 rounded-2xl text-lg"
                                 onkeypress="if(event.key==='Enter') searchFromDB()"
                                 oninput="showDBSuggestions(this.value)"
                                 autocomplete="off"
@@ -839,18 +848,17 @@ app.get('/', (c) => {
                                 <i class="fas fa-search mr-2"></i>검색
                             </button>
                         </div>
-                        <!-- Suggestions Dropdown -->
                         <div id="dbSuggestions" class="hidden absolute left-0 right-0 mt-2 glass-card rounded-xl overflow-hidden max-h-80 overflow-y-auto z-50"></div>
                     </div>
-                    
+
                     <!-- AI Search -->
                     <div id="aiSearch" class="hidden space-y-4">
                         <div class="relative">
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 id="searchInput"
                                 placeholder="예: H40.1, 원발개방각녹내장, H25 백내장"
-                                class="search-input w-full px-6 py-5 rounded-2xl text-white text-lg placeholder-gray-500"
+                                class="search-input w-full px-6 py-5 rounded-2xl text-lg"
                                 onkeypress="if(event.key==='Enter') searchWithGPT()"
                                 autocomplete="off"
                             >
@@ -859,30 +867,92 @@ app.get('/', (c) => {
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Quick Tags -->
                     <div class="flex flex-wrap gap-2 mt-6 justify-center">
-                        <span class="text-gray-500 text-sm">인기 검색:</span>
-                        <button onclick="quickSearch('백내장 H25')" class="px-3 py-1 rounded-lg bg-white/5 text-gray-400 text-sm hover:bg-white/10 transition-colors">백내장</button>
-                        <button onclick="quickSearch('심근경색 I21')" class="px-3 py-1 rounded-lg bg-white/5 text-gray-400 text-sm hover:bg-white/10 transition-colors">심근경색</button>
-                        <button onclick="quickSearch('녹내장 H40')" class="px-3 py-1 rounded-lg bg-white/5 text-gray-400 text-sm hover:bg-white/10 transition-colors">녹내장</button>
-                        <button onclick="quickSearch('뇌경색 I63')" class="px-3 py-1 rounded-lg bg-white/5 text-gray-400 text-sm hover:bg-white/10 transition-colors">뇌경색</button>
+                        <span class="t3 text-sm">인기 검색:</span>
+                        <button onclick="quickSearch('백내장 H25')" class="px-3 py-1 rounded-lg text-sm transition-colors" style="background: rgba(0,200,83,0.08); color: var(--text-2);">백내장</button>
+                        <button onclick="quickSearch('심근경색 I21')" class="px-3 py-1 rounded-lg text-sm transition-colors" style="background: rgba(0,200,83,0.08); color: var(--text-2);">심근경색</button>
+                        <button onclick="quickSearch('녹내장 H40')" class="px-3 py-1 rounded-lg text-sm transition-colors" style="background: rgba(0,200,83,0.08); color: var(--text-2);">녹내장</button>
+                        <button onclick="quickSearch('뇌경색 I63')" class="px-3 py-1 rounded-lg text-sm transition-colors" style="background: rgba(0,200,83,0.08); color: var(--text-2);">뇌경색</button>
                     </div>
                 </div>
-                
+
+                <!-- Medical Image Analysis Section -->
+                <div id="imagingSection" class="hidden glass-card p-6 md:p-8 max-w-3xl mx-auto fade-in-up" style="animation-delay: 0.3s">
+                    <!-- Disclaimer -->
+                    <div class="p-4 rounded-xl mb-6 text-left" style="background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.15);">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-exclamation-triangle mt-1" style="color: var(--red);"></i>
+                            <div>
+                                <p class="font-semibold t1 text-sm">교육용 참고 자료</p>
+                                <p class="t3 text-xs mt-1">본 분석은 교육용 참고 자료이며 실제 진단을 대체하지 않습니다. 정확한 진단은 반드시 전문 의료진과 상담하세요.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload Area -->
+                    <div id="uploadArea" class="upload-area rounded-2xl p-12 text-center mb-6" onclick="document.getElementById('imageFileInput').click()" ondragover="event.preventDefault(); this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleImageDrop(event)">
+                        <input type="file" id="imageFileInput" accept="image/*" class="hidden" onchange="handleImageSelect(this)">
+                        <div id="uploadPlaceholder">
+                            <i class="fas fa-cloud-upload-alt text-4xl mb-4" style="color: var(--green);"></i>
+                            <p class="t1 font-semibold mb-2">의료 영상 업로드</p>
+                            <p class="t3 text-sm">CT, X-ray, MRI 등 의료 영상을 드래그하거나 클릭하세요</p>
+                            <p class="t3 text-xs mt-2">지원 형식: JPG, PNG, WEBP</p>
+                        </div>
+                        <div id="uploadPreview" class="hidden">
+                            <img id="previewImage" class="max-h-64 mx-auto rounded-xl mb-4" alt="">
+                            <p id="previewFileName" class="t2 text-sm font-medium"></p>
+                        </div>
+                    </div>
+
+                    <!-- Patient Info (Optional) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-left">
+                        <div>
+                            <label class="block text-sm font-medium t2 mb-2">환자명 (선택)</label>
+                            <input type="text" id="patientName" class="search-input w-full px-4 py-3 rounded-xl text-sm" placeholder="홍길동">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium t2 mb-2">검사일 (선택)</label>
+                            <input type="date" id="examDate" class="search-input w-full px-4 py-3 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium t2 mb-2">검사 유형</label>
+                            <select id="examType" class="search-input w-full px-4 py-3 rounded-xl text-sm">
+                                <option value="">선택하세요</option>
+                                <option value="X-ray">X-ray</option>
+                                <option value="CT">CT</option>
+                                <option value="MRI">MRI</option>
+                                <option value="Ultrasound">초음파</option>
+                                <option value="PET-CT">PET-CT</option>
+                                <option value="Mammography">유방촬영</option>
+                                <option value="기타">기타</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Analyze Button -->
+                    <button id="analyzeImageBtn" onclick="analyzeImage()" class="w-full btn-primary py-4 rounded-xl text-white font-semibold" disabled>
+                        <i class="fas fa-microscope mr-2"></i>AI 영상 분석 시작
+                    </button>
+
+                    <!-- Analysis Results -->
+                    <div id="imageAnalysisResult" class="hidden mt-6 text-left"></div>
+                </div>
+
                 <!-- Stats -->
                 <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto mt-16 fade-in-up" style="animation-delay: 0.4s">
                     <div class="text-center">
-                        <div class="stat-number text-3xl md:text-4xl font-bold text-white mb-2">11+</div>
-                        <div class="text-gray-500 text-sm">보험사 분석</div>
+                        <div class="stat-number text-3xl md:text-4xl font-bold t1 mb-2">11+</div>
+                        <div class="t3 text-sm">보험사 분석</div>
                     </div>
                     <div class="text-center">
-                        <div class="stat-number text-3xl md:text-4xl font-bold text-white mb-2">50+</div>
-                        <div class="text-gray-500 text-sm">진단코드 DB</div>
+                        <div class="stat-number text-3xl md:text-4xl font-bold t1 mb-2">50+</div>
+                        <div class="t3 text-sm">진단코드 DB</div>
                     </div>
                     <div class="text-center">
-                        <div class="stat-number text-3xl md:text-4xl font-bold text-white mb-2">24/7</div>
-                        <div class="text-gray-500 text-sm">실시간 분석</div>
+                        <div class="stat-number text-3xl md:text-4xl font-bold t1 mb-2">24/7</div>
+                        <div class="t3 text-sm">실시간 분석</div>
                     </div>
                 </div>
             </div>
@@ -890,209 +960,129 @@ app.get('/', (c) => {
 
         <!-- Results Section -->
         <section id="resultsSection" class="hidden py-16 px-4">
-            <div class="max-w-5xl mx-auto">
-                <!-- Results Header -->
+            <div class="container-main">
                 <div class="flex items-center justify-between mb-8">
                     <div>
-                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">검색 결과</h2>
-                        <p id="resultsQuery" class="text-gray-400"></p>
+                        <h2 class="text-2xl md:text-3xl font-bold t1 mb-2">검색 결과</h2>
+                        <p id="resultsQuery" class="t3"></p>
                     </div>
                     <div id="downloadButtons" class="hidden flex gap-3">
-                        <button onclick="downloadAsPDF()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors">
+                        <button onclick="downloadAsPDF()" class="chip flex items-center gap-2 px-4 py-2 rounded-xl transition-colors" style="background: rgba(220,38,38,0.08); color: var(--red);">
                             <i class="fas fa-file-pdf"></i>
                             <span class="hidden md:inline">PDF</span>
                         </button>
-                        <button onclick="downloadAsTXT()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-500/20 text-gray-400 hover:bg-gray-500/30 transition-colors">
+                        <button onclick="downloadAsTXT()" class="chip flex items-center gap-2 px-4 py-2 rounded-xl transition-colors" style="background: rgba(0,0,0,0.05); color: var(--text-3);">
                             <i class="fas fa-file-alt"></i>
                             <span class="hidden md:inline">TXT</span>
                         </button>
                     </div>
                 </div>
-                
-                <!-- Results Content -->
                 <div id="searchResults" class="space-y-6"></div>
-                
-                <!-- DB Results -->
                 <div id="dbSearchResults" class="space-y-6"></div>
             </div>
         </section>
 
         <!-- Features Section -->
         <section class="py-20 px-4">
-            <div class="max-w-6xl mx-auto">
+            <div class="container-main">
                 <div class="text-center mb-16">
-                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">왜 STUDIO JU AI인가?</h2>
-                    <p class="text-gray-400 text-lg">보험 분석의 새로운 기준을 제시합니다</p>
+                    <h2 class="text-3xl md:text-4xl font-bold t1 mb-4">보험스캔의 핵심 기능</h2>
+                    <p class="t3 text-lg">보험 분석과 의료영상 판독을 한곳에서</p>
                 </div>
-                
-                <div class="grid md:grid-cols-3 gap-6">
-                    <!-- Feature 1 -->
-                    <div class="feature-card rounded-2xl p-8">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-6">
-                            <i class="fas fa-bolt text-primary text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-3">실시간 AI 분석</h3>
-                        <p class="text-gray-400 leading-relaxed">Perplexity + GPT 하이브리드 검색으로 최신 보험 정보를 실시간 분석합니다.</p>
-                        <ul class="mt-4 space-y-2">
-                            <li class="flex items-center gap-2 text-gray-400 text-sm">
-                                <i class="fas fa-check text-primary"></i>
-                                실시간 웹 검색
-                            </li>
-                            <li class="flex items-center gap-2 text-gray-400 text-sm">
-                                <i class="fas fa-check text-primary"></i>
-                                GPT 기반 분석
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Feature 2 -->
-                    <div class="feature-card rounded-2xl p-8">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 flex items-center justify-center mb-6">
-                            <i class="fas fa-database text-blue-400 text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-3">ICD-10 진단코드 DB</h3>
-                        <p class="text-gray-400 leading-relaxed">병원 진단서에 표기되는 실제 질병분류코드를 정확하게 검색합니다.</p>
-                        <ul class="mt-4 space-y-2">
-                            <li class="flex items-center gap-2 text-gray-400 text-sm">
-                                <i class="fas fa-check text-blue-400"></i>
-                                정확도 100%
-                            </li>
-                            <li class="flex items-center gap-2 text-gray-400 text-sm">
-                                <i class="fas fa-check text-blue-400"></i>
-                                실제 의료 코드
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Feature 3 -->
-                    <div class="feature-card rounded-2xl p-8">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/10 flex items-center justify-center mb-6">
-                            <i class="fas fa-building text-purple-400 text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-3">11개 보험사 분석</h3>
-                        <p class="text-gray-400 leading-relaxed">국내 주요 11개 보험사의 수술비 특약을 한 번에 비교 분석합니다.</p>
-                        <ul class="mt-4 space-y-2">
-                            <li class="flex items-center gap-2 text-gray-400 text-sm">
-                                <i class="fas fa-check text-purple-400"></i>
-                                1-5종 수술비
-                            </li>
-                            <li class="flex items-center gap-2 text-gray-400 text-sm">
-                                <i class="fas fa-check text-purple-400"></i>
-                                N대 수술비 등급
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <!-- Projects Section -->
-        <section class="py-20 px-4 border-t border-white/5">
-            <div class="max-w-6xl mx-auto">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">STUDIO JU AI 프로젝트</h2>
-                    <p class="text-gray-400">다양한 AI 기반 솔루션을 경험해보세요</p>
-                </div>
-                
                 <div class="grid md:grid-cols-3 gap-6">
-                    <a href="https://medical-report-analyzer-ten.vercel.app/" target="_blank" class="feature-card rounded-2xl p-6 group">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i class="fas fa-x-ray text-blue-400 text-xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-white">의료 영상 판독</h3>
-                                <p class="text-sm text-gray-500">AI 기반 의료 영상 분석</p>
-                            </div>
+                    <div class="feature-card rounded-2xl p-8">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background: rgba(0,200,83,0.1);">
+                            <i class="fas fa-bolt text-2xl" style="color: var(--green);"></i>
                         </div>
-                        <p class="text-gray-400 text-sm">X-ray, CT, MRI 영상을 AI가 분석하여 진단을 보조합니다.</p>
-                    </a>
-                    
-                    <a href="https://studiojuai-crypto.bolt.host/" target="_blank" class="feature-card rounded-2xl p-6 group">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i class="fab fa-bitcoin text-green-400 text-xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-white">암호화폐 분석</h3>
-                                <p class="text-sm text-gray-500">AI 기반 가격 예측</p>
-                            </div>
+                        <h3 class="text-xl font-bold t1 mb-3">실시간 AI 분석</h3>
+                        <p class="t3 leading-relaxed">Perplexity + GPT 하이브리드 검색으로 최신 보험 정보를 실시간 분석합니다.</p>
+                        <ul class="mt-4 space-y-2">
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check" style="color: var(--green);"></i>실시간 웹 검색</li>
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check" style="color: var(--green);"></i>GPT 기반 분석</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card rounded-2xl p-8">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background: rgba(59,130,246,0.1);">
+                            <i class="fas fa-database text-blue-500 text-2xl"></i>
                         </div>
-                        <p class="text-gray-400 text-sm">머신러닝 기반 암호화폐 시장 분석 및 가격 예측 플랫폼입니다.</p>
-                    </a>
-                    
-                    <a href="https://studioju-tarot.pages.dev/" target="_blank" class="feature-card rounded-2xl p-6 group">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i class="fas fa-star-and-crescent text-purple-400 text-xl"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-white">타로 리딩</h3>
-                                <p class="text-sm text-gray-500">AI 기반 타로 카드</p>
-                            </div>
+                        <h3 class="text-xl font-bold t1 mb-3">ICD-10 진단코드 DB</h3>
+                        <p class="t3 leading-relaxed">병원 진단서에 표기되는 실제 질병분류코드를 정확하게 검색합니다.</p>
+                        <ul class="mt-4 space-y-2">
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-blue-500"></i>정확도 100%</li>
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-blue-500"></i>실제 의료 코드</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card rounded-2xl p-8">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background: rgba(139,92,246,0.1);">
+                            <i class="fas fa-x-ray text-purple-500 text-2xl"></i>
                         </div>
-                        <p class="text-gray-400 text-sm">AI가 타로 카드를 해석하여 인생의 방향을 제시합니다.</p>
-                    </a>
+                        <h3 class="text-xl font-bold t1 mb-3">의료영상 AI 판독</h3>
+                        <p class="t3 leading-relaxed">X-ray, CT, MRI 영상을 AI가 분석하여 교육용 참고 소견을 제공합니다.</p>
+                        <ul class="mt-4 space-y-2">
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-purple-500"></i>OpenAI Vision</li>
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-purple-500"></i>교육용 참고 자료</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Quick Links Section -->
-        <section class="py-20 px-4 border-t border-white/5">
-            <div class="max-w-6xl mx-auto">
+        <section class="py-20 px-4" style="border-top: 1px solid var(--card-border);">
+            <div class="container-main">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-white mb-4">빠른 링크</h2>
-                    <p class="text-gray-400">보험 및 유관기관 바로가기</p>
+                    <h2 class="text-3xl font-bold t1 mb-4">빠른 링크</h2>
+                    <p class="t3">보험 및 유관기관 바로가기</p>
                 </div>
-                
+
                 <div class="grid md:grid-cols-3 gap-6">
-                    <!-- 보험기관 -->
                     <div class="glass-card rounded-2xl p-6">
                         <button onclick="toggleOrgSection('insurance')" class="w-full flex items-center justify-between text-left">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                                    <i class="fas fa-building text-blue-400"></i>
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(59,130,246,0.1);">
+                                    <i class="fas fa-building text-blue-500"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-white">보험기관</h3>
-                                    <p class="text-sm text-gray-500" id="insuranceCount"></p>
+                                    <h3 class="font-bold t1">보험기관</h3>
+                                    <p class="text-sm t3" id="insuranceCount"></p>
                                 </div>
                             </div>
-                            <i class="fas fa-chevron-down text-gray-500 transition-transform" id="insuranceChevron"></i>
+                            <i class="fas fa-chevron-down t3 transition-transform" id="insuranceChevron"></i>
                         </button>
                         <div id="insuranceOrgs" class="hidden mt-4 space-y-2 max-h-64 overflow-y-auto"></div>
                     </div>
-                    
-                    <!-- 유관기관 -->
+
                     <div class="glass-card rounded-2xl p-6">
                         <button onclick="toggleOrgSection('related')" class="w-full flex items-center justify-between text-left">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
-                                    <i class="fas fa-university text-green-400"></i>
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(0,200,83,0.1);">
+                                    <i class="fas fa-university" style="color: var(--green);"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-white">유관기관</h3>
-                                    <p class="text-sm text-gray-500" id="relatedCount"></p>
+                                    <h3 class="font-bold t1">유관기관</h3>
+                                    <p class="text-sm t3" id="relatedCount"></p>
                                 </div>
                             </div>
-                            <i class="fas fa-chevron-down text-gray-500 transition-transform" id="relatedChevron"></i>
+                            <i class="fas fa-chevron-down t3 transition-transform" id="relatedChevron"></i>
                         </button>
                         <div id="relatedOrgs" class="hidden mt-4 space-y-2 max-h-64 overflow-y-auto"></div>
                     </div>
-                    
-                    <!-- 해외기관 -->
+
                     <div class="glass-card rounded-2xl p-6">
                         <button onclick="toggleOrgSection('overseas')" class="w-full flex items-center justify-between text-left">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                                    <i class="fas fa-globe text-purple-400"></i>
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(139,92,246,0.1);">
+                                    <i class="fas fa-globe text-purple-500"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-white">해외보험기관</h3>
-                                    <p class="text-sm text-gray-500" id="overseasCount"></p>
+                                    <h3 class="font-bold t1">해외보험기관</h3>
+                                    <p class="text-sm t3" id="overseasCount"></p>
                                 </div>
                             </div>
-                            <i class="fas fa-chevron-down text-gray-500 transition-transform" id="overseasChevron"></i>
+                            <i class="fas fa-chevron-down t3 transition-transform" id="overseasChevron"></i>
                         </button>
                         <div id="overseasOrgs" class="hidden mt-4 space-y-2 max-h-64 overflow-y-auto"></div>
                     </div>
@@ -1100,32 +1090,45 @@ app.get('/', (c) => {
             </div>
         </section>
 
+        <!-- AI Disclaimer -->
+        <section class="py-8 px-4" style="background: rgba(0,200,83,0.03); border-top: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border);">
+            <div class="container-main">
+                <div class="flex items-start gap-4">
+                    <i class="fas fa-info-circle text-xl mt-1" style="color: var(--green);"></i>
+                    <div>
+                        <p class="font-semibold t1 mb-1">AI 분석 안내</p>
+                        <p class="t3 text-sm leading-relaxed">본 서비스의 모든 AI 분석 결과(보험 특약 분석, 의료영상 판독)는 교육용 참고 자료이며 실제 진단이나 보험 심사를 대체하지 않습니다. 정확한 판단은 전문 의료진 및 보험 전문가와 상담하세요.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Footer -->
-        <footer class="py-12 px-4 border-t border-white/5">
-            <div class="max-w-6xl mx-auto">
+        <footer class="py-12 px-4" style="border-top: 1px solid var(--card-border);">
+            <div class="container-main">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center">
-                            <i class="fas fa-shield-heart text-white"></i>
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: #00C853;">
+                            <span class="text-white font-bold text-lg">스</span>
                         </div>
-                        <span class="text-xl font-bold text-white">STUDIO JU AI</span>
+                        <span class="text-xl font-bold t1">보험스캔</span>
                     </div>
-                    
+
                     <div class="flex items-center gap-6">
-                        <a href="https://www.studiojuai.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                        <a href="https://www.studiojuai.com" target="_blank" class="t3 hover:opacity-70 transition-colors">
                             <i class="fas fa-globe mr-2"></i>Website
                         </a>
-                        <a href="https://www.instagram.com/STUDIO_JU_AI" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                        <a href="https://www.instagram.com/STUDIO_JU_AI" target="_blank" class="t3 hover:opacity-70 transition-colors">
                             <i class="fab fa-instagram mr-2"></i>Instagram
                         </a>
-                        <a href="mailto:ikjoobang@gmail.com" class="text-gray-400 hover:text-white transition-colors">
+                        <a href="mailto:ikjoobang@gmail.com" class="t3 hover:opacity-70 transition-colors">
                             <i class="fas fa-envelope mr-2"></i>Contact
                         </a>
                     </div>
                 </div>
-                
-                <div class="text-center mt-8 pt-8 border-t border-white/5">
-                    <p class="text-gray-500 text-sm">© 2025 STUDIO JU AI. All rights reserved.</p>
+
+                <div class="text-center mt-8 pt-8" style="border-top: 1px solid var(--card-border);">
+                    <p class="t3 text-sm">&copy; 2025 보험스캔. All rights reserved.</p>
                 </div>
             </div>
         </footer>
@@ -1134,40 +1137,40 @@ app.get('/', (c) => {
         <div id="adminModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div class="glass-card rounded-3xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold text-white">관리자 패널</h2>
-                    <button onclick="closeAdminPanel()" class="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
-                        <i class="fas fa-times text-gray-400"></i>
+                    <h2 class="text-2xl font-bold t1">관리자 패널</h2>
+                    <button onclick="closeAdminPanel()" class="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style="border: 1px solid var(--card-border);">
+                        <i class="fas fa-times t3"></i>
                     </button>
                 </div>
-                
+
                 <div class="space-y-3">
-                    <button onclick="showPDFUpload()" class="w-full flex items-center gap-4 p-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-colors text-left">
-                        <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                            <i class="fas fa-file-pdf text-red-400"></i>
+                    <button onclick="showPDFUpload()" class="w-full flex items-center gap-4 p-4 rounded-xl transition-colors text-left" style="background: rgba(220,38,38,0.06);">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(220,38,38,0.1);">
+                            <i class="fas fa-file-pdf" style="color: var(--red);"></i>
                         </div>
                         <div>
-                            <div class="font-semibold text-white">PDF 업로드</div>
-                            <div class="text-sm text-gray-400">보험 약관 분석</div>
+                            <div class="font-semibold t1">PDF 업로드</div>
+                            <div class="text-sm t3">보험 약관 분석</div>
                         </div>
                     </button>
-                    
-                    <button onclick="syncHIRAData()" class="w-full flex items-center gap-4 p-4 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 transition-colors text-left">
-                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                            <i class="fas fa-database text-blue-400"></i>
+
+                    <button onclick="syncHIRAData()" class="w-full flex items-center gap-4 p-4 rounded-xl transition-colors text-left" style="background: rgba(59,130,246,0.06);">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(59,130,246,0.1);">
+                            <i class="fas fa-database text-blue-500"></i>
                         </div>
                         <div>
-                            <div class="font-semibold text-white">HIRA 동기화</div>
-                            <div class="text-sm text-gray-400">건강보험심사평가원 데이터</div>
+                            <div class="font-semibold t1">HIRA 동기화</div>
+                            <div class="text-sm t3">건강보험심사평가원 데이터</div>
                         </div>
                     </button>
-                    
-                    <button onclick="triggerAutoUpdate()" class="w-full flex items-center gap-4 p-4 rounded-xl bg-green-500/10 hover:bg-green-500/20 transition-colors text-left">
-                        <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                            <i class="fas fa-sync-alt text-green-400"></i>
+
+                    <button onclick="triggerAutoUpdate()" class="w-full flex items-center gap-4 p-4 rounded-xl transition-colors text-left" style="background: rgba(0,200,83,0.06);">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(0,200,83,0.1);">
+                            <i class="fas fa-sync-alt" style="color: var(--green);"></i>
                         </div>
                         <div>
-                            <div class="font-semibold text-white">자동 업데이트</div>
-                            <div class="text-sm text-gray-400">데이터 갱신</div>
+                            <div class="font-semibold t1">자동 업데이트</div>
+                            <div class="text-sm t3">데이터 갱신</div>
                         </div>
                     </button>
                 </div>
@@ -1178,27 +1181,27 @@ app.get('/', (c) => {
         <div id="pdfUploadModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div class="glass-card rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold text-white">PDF 업로드</h2>
-                    <button onclick="closePDFUpload()" class="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
-                        <i class="fas fa-times text-gray-400"></i>
+                    <h2 class="text-2xl font-bold t1">PDF 업로드</h2>
+                    <button onclick="closePDFUpload()" class="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style="border: 1px solid var(--card-border);">
+                        <i class="fas fa-times t3"></i>
                     </button>
                 </div>
-                
+
                 <div class="space-y-6">
-                    <div class="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                        <h3 class="font-semibold text-blue-400 mb-2">
+                    <div class="p-4 rounded-xl" style="background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15);">
+                        <h3 class="font-semibold text-blue-500 mb-2">
                             <i class="fas fa-info-circle mr-2"></i>사용 방법
                         </h3>
-                        <ol class="text-sm text-gray-300 space-y-1">
+                        <ol class="text-sm t2 space-y-1">
                             <li>1. 보험사 선택</li>
                             <li>2. 보험사 약관 PDF 파일 업로드</li>
                             <li>3. AI가 PDF를 분석하여 수술 코드별 보험 등급 추출</li>
                         </ol>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">보험사 선택</label>
-                        <select id="insuranceCompanySelect" class="w-full px-4 py-3 rounded-xl search-input text-white">
+                        <label class="block text-sm font-medium t2 mb-2">보험사 선택</label>
+                        <select id="insuranceCompanySelect" class="w-full px-4 py-3 rounded-xl search-input">
                             <option value="">보험사를 선택하세요</option>
                             <option value="삼성화재">삼성화재 (111대)</option>
                             <option value="현대해상">현대해상 (119대)</option>
@@ -1209,26 +1212,26 @@ app.get('/', (c) => {
                             <option value="메리츠화재">메리츠화재 (119대)</option>
                         </select>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">PDF 파일</label>
-                        <input type="file" id="pdfFileInput" accept=".pdf" class="w-full px-4 py-3 rounded-xl search-input text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white file:cursor-pointer">
+                        <label class="block text-sm font-medium t2 mb-2">PDF 파일</label>
+                        <input type="file" id="pdfFileInput" accept=".pdf" class="w-full px-4 py-3 rounded-xl search-input file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white file:cursor-pointer">
                     </div>
-                    
+
                     <button onclick="uploadAndAnalyzePDF()" class="w-full btn-primary py-4 rounded-xl text-white font-semibold">
                         <i class="fas fa-upload mr-2"></i>PDF 업로드 및 분석
                     </button>
-                    
+
                     <div id="pdfAnalysisProgress" class="hidden">
-                        <div class="flex items-center gap-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                        <div class="flex items-center gap-4 p-4 rounded-xl" style="background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.2);">
                             <div class="spinner"></div>
                             <div>
-                                <div class="font-semibold text-yellow-400">PDF 분석 중...</div>
-                                <div id="pdfAnalysisStatus" class="text-sm text-gray-400">업로드 중입니다...</div>
+                                <div class="font-semibold" style="color: #ca8a04;">PDF 분석 중...</div>
+                                <div id="pdfAnalysisStatus" class="text-sm t3">업로드 중입니다...</div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div id="pdfAnalysisResult" class="hidden"></div>
                 </div>
             </div>
@@ -1749,6 +1752,144 @@ app.get('/api/gpt-search', async (c) => {
     console.error('Hybrid search error:', error)
     return c.json({ 
       error: '검색 중 오류가 발생했습니다',
+      details: error instanceof Error ? error.message : String(error)
+    }, 500)
+  }
+})
+
+// ==================== 의료 영상 판독 API ====================
+
+app.post('/api/analyze-image', async (c) => {
+  const apiKey = c.env.OPENAI_API_KEY
+  if (!apiKey) {
+    return c.json({ error: 'OpenAI API 키가 설정되지 않았습니다' }, 500)
+  }
+
+  try {
+    const formData = await c.req.formData()
+    const imageFile = formData.get('image') as File
+    const patientName = (formData.get('patientName') as string) || ''
+    const examDate = (formData.get('examDate') as string) || ''
+    const examType = (formData.get('examType') as string) || ''
+
+    if (!imageFile) {
+      return c.json({ error: '이미지 파일을 업로드해주세요' }, 400)
+    }
+
+    const arrayBuffer = await imageFile.arrayBuffer()
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+    const mimeType = imageFile.type || 'image/png'
+
+    console.log(`[영상판독] 분석 시작: ${examType || 'unknown'} (${imageFile.size} bytes)`)
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `당신은 의료 영상 판독 보조 AI 시스템입니다.
+
+주요 역할:
+- 의료 영상(X-ray, CT, MRI 등)을 분석하여 소견을 제공합니다
+- 교육 및 연구 목적의 참고 자료를 생성합니다
+- 이 결과는 진단 도구가 아니며, 반드시 전문 의료진의 판독이 필요합니다
+
+응답 형식 (반드시 JSON):
+{
+  "findings": "주요 소견 (한국어로 상세히 기술)",
+  "impression": "종합 인상 (한국어)",
+  "icd10_codes": [{"code": "코드", "name": "질환명"}],
+  "recommended_tests": ["권장 추가 검사 목록"],
+  "recommended_departments": ["권장 진료과"],
+  "cautions": ["주의사항 및 참고사항"],
+  "confidence": "분석 신뢰도 (high/medium/low)"
+}
+
+중요 규칙:
+1. 반드시 한국어로 응답
+2. 환자 개인정보(이름, 주민번호 등)가 영상에 보이면 분석을 거부하고 error 필드로 알림
+3. 반드시 유효한 JSON 형식으로만 응답 (마크다운 코드블록 없이 순수 JSON)
+4. 불확실한 소견은 명시적으로 "불확실" 표시
+5. 항상 전문의 상담을 권장하는 문구 포함`
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: `다음 의료 영상을 분석해주세요.${examType ? ' 검사 유형: ' + examType : ''}${patientName ? ' 환자명: ' + patientName : ''}${examDate ? ' 검사일: ' + examDate : ''}\n\nJSON 형식으로만 응답해주세요.`
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mimeType};base64,${base64}`
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 4096,
+        temperature: 0.3
+      })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('[영상판독] OpenAI API 오류:', errorText)
+      return c.json({ error: 'OpenAI API 호출 실패', details: errorText }, 500)
+    }
+
+    const result = await response.json() as {
+      choices?: Array<{
+        message?: {
+          content?: string
+        }
+      }>
+    }
+    const content = result.choices?.[0]?.message?.content
+
+    if (!content) {
+      return c.json({ error: 'AI 응답이 비어있습니다' }, 500)
+    }
+
+    // Safety filter detection
+    if (content.includes("I can't assist") || content.includes("I cannot assist") || content.includes("I'm unable")) {
+      return c.json({
+        error: '이미지 분석이 거부되었습니다. 개인정보가 포함되었거나 부적절한 이미지일 수 있습니다.'
+      }, 400)
+    }
+
+    // JSON extraction
+    let analysis = null
+    const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      try {
+        analysis = JSON.parse(jsonMatch[1] || jsonMatch[0])
+      } catch {
+        analysis = { findings: content, raw: true }
+      }
+    } else {
+      analysis = { findings: content, raw: true }
+    }
+
+    console.log(`[영상판독] 분석 완료`)
+
+    return c.json({
+      success: true,
+      analysis,
+      examType,
+      analyzedAt: new Date().toISOString()
+    })
+  } catch (error) {
+    console.error('[영상판독] 오류:', error)
+    return c.json({
+      error: '영상 분석 중 오류가 발생했습니다',
       details: error instanceof Error ? error.message : String(error)
     }, 500)
   }
