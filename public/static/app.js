@@ -11,7 +11,7 @@ let selectedImageFile = null;
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-  loadDiagnosisDB();
+  loadDiagnosisDB().then(() => showPopularCodes());
   loadSurgeryDB();
   loadOrganizations();
 });
@@ -178,6 +178,54 @@ function toggleOrgSection(section) {
     orgsDiv.classList.add('hidden');
     chevron.style.transform = 'rotate(0deg)';
   }
+}
+
+// ==================== 인기 진단코드 기본 표시 ====================
+
+function showPopularCodes() {
+  const popularCodes = ['H25', 'I21', 'H40', 'I63', 'K80', 'M17', 'J18', 'E11', 'I10', 'C34'];
+  const popularItems = [];
+
+  for (const code of popularCodes) {
+    const found = diagnosisDB.find(item => item.code === code || item.code.startsWith(code + '.'));
+    if (found) popularItems.push(found);
+  }
+
+  if (popularItems.length === 0) return;
+
+  const resultsSection = document.getElementById('resultsSection');
+  const dbResultsDiv = document.getElementById('dbSearchResults');
+  const queryDisplay = document.getElementById('resultsQuery');
+
+  queryDisplay.textContent = '자주 찾는 진단코드';
+  resultsSection.classList.remove('hidden');
+
+  dbResultsDiv.innerHTML = `
+    <div class="result-card p-6 md:p-8">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(0,200,83,0.1);">
+          <i class="fas fa-fire-alt text-xl" style="color: var(--green);"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold t1">자주 찾는 진단코드</h3>
+          <p class="t3 text-sm">클릭하면 바로 검색됩니다</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        ${popularItems.map(item => `
+          <div class="p-4 rounded-xl cursor-pointer transition-all" style="background: rgba(59,130,246,0.04); border: 1px solid var(--card-border);"
+               onclick="document.getElementById('dbSearchInput').value='${item.code} ${item.name}'; searchFromDB();"
+               onmouseover="this.style.borderColor='rgba(0,200,83,0.3)'" onmouseout="this.style.borderColor=''">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-lg font-mono text-sm font-bold" style="background: rgba(59,130,246,0.1); color: #3b82f6;">${item.code}</span>
+              <span class="t1 font-medium text-sm">${item.name}</span>
+            </div>
+            ${item.category ? `<p class="t3 text-xs mt-1 ml-1">${item.category}</p>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
 }
 
 // ==================== ICD DB 검색 ====================
@@ -538,7 +586,7 @@ function displayGPTResults(result, query) {
           </div>
           <div>
             <h3 class="text-xl font-bold t1">AI 분석 결과</h3>
-            <p class="t3 text-sm">Perplexity + GPT 하이브리드 검색</p>
+            <p class="t3 text-sm">AI 하이브리드 검색</p>
           </div>
         </div>
         <div class="prose max-w-none">

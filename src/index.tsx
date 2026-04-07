@@ -552,7 +552,7 @@ app.get('/', (c) => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>보험스캔 - ICD-10 진단코드 검색 + 의료영상 AI 판독</title>
-        <meta name="description" content="ICD-10 진단코드 검색, 11개 보험사 수술비 특약 비교, 의료영상 AI 판독(교육용)을 하나의 사이트에서 제공합니다.">
+        <meta name="description" content="ICD-10 진단코드 검색, 생보 손보 전사 수술비 특약 비교, 의료영상 AI 판독(교육용)을 하나의 사이트에서 제공합니다.">
         <meta property="og:title" content="보험스캔">
         <meta property="og:description" content="ICD-10 진단코드 검색 + 의료영상 AI 판독">
         <meta property="og:type" content="website">
@@ -806,7 +806,7 @@ app.get('/', (c) => {
 
                 <!-- Hero Subtitle -->
                 <p class="hero-subtitle text-lg md:text-xl t3 mb-12 max-w-2xl mx-auto fade-in-up" style="animation-delay: 0.2s">
-                    ICD-10 진단코드 검색, 11개 보험사 특약 비교,<br class="hidden md:block">
+                    ICD-10 진단코드 검색, 생보 손보 전사 특약 비교,<br class="hidden md:block">
                     의료영상 AI 판독(교육용)을 한곳에서
                 </p>
 
@@ -943,15 +943,15 @@ app.get('/', (c) => {
                 <!-- Stats -->
                 <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto mt-16 fade-in-up" style="animation-delay: 0.4s">
                     <div class="text-center">
-                        <div class="stat-number text-3xl md:text-4xl font-bold t1 mb-2">11+</div>
-                        <div class="t3 text-sm">보험사 분석</div>
+                        <div class="stat-number text-2xl md:text-3xl font-bold t1 mb-2">생보 손보</div>
+                        <div class="t3 text-sm">전사 분석</div>
                     </div>
                     <div class="text-center">
-                        <div class="stat-number text-3xl md:text-4xl font-bold t1 mb-2">50+</div>
-                        <div class="t3 text-sm">진단코드 DB</div>
+                        <div class="stat-number text-2xl md:text-3xl font-bold t1 mb-2">ICD-10</div>
+                        <div class="t3 text-sm">전체 진단코드</div>
                     </div>
                     <div class="text-center">
-                        <div class="stat-number text-3xl md:text-4xl font-bold t1 mb-2">24/7</div>
+                        <div class="stat-number text-2xl md:text-3xl font-bold t1 mb-2">24/7</div>
                         <div class="t3 text-sm">실시간 분석</div>
                     </div>
                 </div>
@@ -996,10 +996,10 @@ app.get('/', (c) => {
                             <i class="fas fa-bolt text-2xl" style="color: var(--green);"></i>
                         </div>
                         <h3 class="text-xl font-bold t1 mb-3">실시간 AI 분석</h3>
-                        <p class="t3 leading-relaxed">Perplexity + GPT 하이브리드 검색으로 최신 보험 정보를 실시간 분석합니다.</p>
+                        <p class="t3 leading-relaxed">AI 하이브리드 검색으로 최신 보험 정보를 실시간 분석합니다.</p>
                         <ul class="mt-4 space-y-2">
                             <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check" style="color: var(--green);"></i>실시간 웹 검색</li>
-                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check" style="color: var(--green);"></i>GPT 기반 분석</li>
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check" style="color: var(--green);"></i>AI 실시간 분석</li>
                         </ul>
                     </div>
 
@@ -1022,7 +1022,7 @@ app.get('/', (c) => {
                         <h3 class="text-xl font-bold t1 mb-3">의료영상 AI 판독</h3>
                         <p class="t3 leading-relaxed">X-ray, CT, MRI 영상을 AI가 분석하여 교육용 참고 소견을 제공합니다.</p>
                         <ul class="mt-4 space-y-2">
-                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-purple-500"></i>OpenAI Vision</li>
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-purple-500"></i>AI 영상 분석</li>
                             <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-purple-500"></i>교육용 참고 자료</li>
                         </ul>
                     </div>
@@ -1106,7 +1106,7 @@ app.get('/', (c) => {
         <!-- Footer -->
         <footer class="py-12 px-4" style="border-top: 1px solid var(--card-border);">
             <div class="container-main">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex flex-col items-center gap-8">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: #00C853;">
                             <span class="text-white font-bold text-lg">스</span>
@@ -1114,21 +1114,21 @@ app.get('/', (c) => {
                         <span class="text-xl font-bold t1">보험스캔</span>
                     </div>
 
-                    <div class="flex items-center gap-6">
-                        <a href="https://www.studiojuai.com" target="_blank" class="t3 hover:opacity-70 transition-colors">
-                            <i class="fas fa-globe mr-2"></i>Website
+                    <!-- Family Links -->
+                    <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+                        <a href="https://bohumhaja.com/" target="_blank" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold t1 transition-all text-sm" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
+                            <i class="fas fa-shield-alt" style="color: var(--green);"></i>
+                            보험하자
                         </a>
-                        <a href="https://www.instagram.com/STUDIO_JU_AI" target="_blank" class="t3 hover:opacity-70 transition-colors">
-                            <i class="fab fa-instagram mr-2"></i>Instagram
-                        </a>
-                        <a href="mailto:ikjoobang@gmail.com" class="t3 hover:opacity-70 transition-colors">
-                            <i class="fas fa-envelope mr-2"></i>Contact
+                        <a href="https://www.in-sns.com/" target="_blank" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold t1 transition-all text-sm" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
+                            <i class="fas fa-comments" style="color: var(--green);"></i>
+                            보험소통
                         </a>
                     </div>
-                </div>
 
-                <div class="text-center mt-8 pt-8" style="border-top: 1px solid var(--card-border);">
-                    <p class="t3 text-sm">&copy; 2025 보험스캔. All rights reserved.</p>
+                    <div class="pt-4 w-full text-center" style="border-top: 1px solid var(--card-border);">
+                        <p class="t3 text-sm">&copy; 2025 보험스캔. All rights reserved.</p>
+                    </div>
                 </div>
             </div>
         </footer>
@@ -1387,7 +1387,7 @@ app.post('/api/admin/analyze-pdf', async (c) => {
     const arrayBuffer = await file.arrayBuffer()
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
 
-    console.log(`📄 PDF 분석 시작: ${company} (${file.size} bytes)`)
+    console.log(`[PDF] 분석 시작: ${company} (${file.size} bytes)`)
 
     // OpenAI API로 PDF 분석
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -1481,7 +1481,7 @@ app.post('/api/admin/analyze-pdf', async (c) => {
       }, 500)
     }
 
-    console.log(`✅ PDF 분석 완료: ${extracted.items?.length || 0}개 항목 추출`)
+    console.log(`[PDF] 분석 완료: ${extracted.items?.length || 0}개 항목 추출`)
 
     return c.json({
       success: true,
@@ -1524,7 +1524,7 @@ app.post('/api/gemini/generate', async (c) => {
       return c.json({ error: '프롬프트가 필요합니다' }, 400)
     }
 
-    console.log(`🤖 Gemini API 호출: model=${model}, prompt 길이=${prompt.length}`)
+    console.log(`[Gemini] API 호출: model=${model}, prompt length=${prompt.length}`)
 
     // Gemini API 호출 (v1beta 엔드포인트)
     const response = await fetch(
@@ -1567,7 +1567,7 @@ app.post('/api/gemini/generate', async (c) => {
     // 응답에서 텍스트 추출
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
     
-    console.log(`✅ Gemini 응답 완료: ${text.length}자`)
+    console.log(`[Gemini] 응답 완료: ${text.length}자`)
 
     return c.json({
       success: true,
@@ -1641,7 +1641,7 @@ JSON 형식:
   "lastUpdated": "정보 기준일"
 }`
 
-    console.log(`🔍 Gemini 보험 분석 시작: ${searchTerm}`)
+    console.log(`[Gemini] 보험 분석 시작: ${searchTerm}`)
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
@@ -1692,7 +1692,7 @@ JSON 형식:
       }
     }
 
-    console.log(`✅ Gemini 보험 분석 완료: ${searchTerm}`)
+    console.log(`[Gemini] 보험 분석 완료: ${searchTerm}`)
 
     return c.json({
       success: true,
@@ -1729,7 +1729,7 @@ app.get('/api/gpt-search', async (c) => {
       }, 400)
     }
 
-    console.log(`🔍 하이브리드 검색 시작: "${query}"`)
+    console.log(`[검색] 하이브리드 검색 시작: "${query}"`)
     const startTime = Date.now()
     
     // 하이브리드 검색 실행 (Perplexity API 포함)
@@ -1737,7 +1737,7 @@ app.get('/api/gpt-search', async (c) => {
     const result = await hybridSearch(query, c.env.DB, apiKey, perplexityApiKey)
     
     const searchTime = Date.now() - startTime
-    console.log(`✅ 검색 완료: ${result.stats.totalResults}개 (DB: ${result.stats.fromDB}, GPT: ${result.stats.fromGPT}, ${searchTime}ms)`)
+    console.log(`[검색] 완료: ${result.stats.totalResults}개 (DB: ${result.stats.fromDB}, AI: ${result.stats.fromGPT}, ${searchTime}ms)`)
 
     return c.json({
       success: result.success,
