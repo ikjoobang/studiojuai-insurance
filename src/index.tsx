@@ -1247,6 +1247,24 @@ app.get('/', (c) => {
         </div>
 
         <script src="/static/app.js"></script>
+        <script>
+        // DevTools 방지
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'F12') { e.preventDefault(); return false; }
+          if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+          if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+        });
+        (function() {
+          var threshold = 160;
+          var check = setInterval(function() {
+            if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+              document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#FAFAF8;"><div style="text-align:center;"><h2 style="color:#111;">개발자 도구 감지됨</h2><p style="color:#666;margin-top:8px;">개발자 도구를 닫고 페이지를 새로고침해주세요.</p></div></div>';
+              clearInterval(check);
+            }
+          }, 1000);
+        })();
+        </script>
     </body>
     </html>
   `)
@@ -1380,7 +1398,7 @@ app.post('/api/admin/analyze-pdf', async (c) => {
 
     const apiKey = c.env.OPENAI_API_KEY
     if (!apiKey) {
-      return c.json({ error: 'OpenAI API 키가 설정되지 않았습니다.' }, 400)
+      return c.json({ error: 'AI API 키가 설정되지 않았습니다.' }, 400)
     }
 
     // PDF를 base64로 변환
@@ -1452,10 +1470,10 @@ app.post('/api/admin/analyze-pdf', async (c) => {
 
     if (!response.ok) {
       const error = await response.text()
-      console.error('OpenAI API 오류:', error)
-      return c.json({ 
-        error: 'OpenAI API 호출 실패', 
-        details: error 
+      console.error('AI API 오류:', error)
+      return c.json({
+        error: 'AI API 호출 실패',
+        details: error
       }, 500)
     }
 
@@ -1463,7 +1481,7 @@ app.post('/api/admin/analyze-pdf', async (c) => {
     const content = result.choices[0]?.message?.content
 
     if (!content) {
-      return c.json({ error: 'GPT 응답이 비어있습니다' }, 500)
+      return c.json({ error: 'AI 응답이 비어있습니다' }, 500)
     }
 
     // JSON 추출
@@ -1724,8 +1742,8 @@ app.get('/api/gpt-search', async (c) => {
     const apiKey = c.env.OPENAI_API_KEY
     
     if (!apiKey) {
-      return c.json({ 
-        error: 'OpenAI API 키가 설정되지 않았습니다.' 
+      return c.json({
+        error: 'AI API 키가 설정되지 않았습니다.'
       }, 400)
     }
 
@@ -1762,7 +1780,7 @@ app.get('/api/gpt-search', async (c) => {
 app.post('/api/analyze-image', async (c) => {
   const apiKey = c.env.OPENAI_API_KEY
   if (!apiKey) {
-    return c.json({ error: 'OpenAI API 키가 설정되지 않았습니다' }, 500)
+    return c.json({ error: 'AI API 키가 설정되지 않았습니다' }, 500)
   }
 
   try {
@@ -1841,8 +1859,8 @@ app.post('/api/analyze-image', async (c) => {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('[영상판독] OpenAI API 오류:', errorText)
-      return c.json({ error: 'OpenAI API 호출 실패', details: errorText }, 500)
+      console.error('[영상판독] AI API 오류:', errorText)
+      return c.json({ error: 'AI API 호출 실패', details: errorText }, 500)
     }
 
     const result = await response.json() as {
