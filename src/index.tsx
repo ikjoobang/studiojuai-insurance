@@ -586,6 +586,7 @@ app.get('/', (c) => {
             --green: #00C853;
             --green-light: #69F0AE;
             --red: #dc2626;
+            --chip-bg: rgba(0,0,0,0.02);
           }
           [data-theme="dark"] {
             --bg: #0a0a0a;
@@ -594,6 +595,7 @@ app.get('/', (c) => {
             --text-1: #FFFFFF;
             --text-2: #E0E0E0;
             --text-3: #999999;
+            --chip-bg: rgba(255,255,255,0.03);
           }
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html { scroll-behavior: smooth; }

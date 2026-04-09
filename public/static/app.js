@@ -583,16 +583,14 @@ function displayGPTResults(result, query) {
       <div class="result-card p-6 md:p-8">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: rgba(0,200,83,0.1);">
-            <i class="fas fa-robot text-xl" style="color: var(--green);"></i>
+            <i class="fas fa-chart-line text-xl" style="color: var(--green);"></i>
           </div>
           <div>
             <h3 class="text-xl font-bold t1">데이터 검증 결과</h3>
             <p class="t3 text-sm">보험 데이터 검증 시스템</p>
           </div>
         </div>
-        <div class="prose max-w-none">
-          <div class="t2 leading-relaxed whitespace-pre-wrap">${result.answer}</div>
-        </div>
+        ${renderAnswerCards(result.answer)}
       </div>
     `;
   } else {
@@ -868,6 +866,125 @@ function formatCurrency(amount) {
     style: 'currency',
     currency: 'KRW'
   }).format(amount);
+}
+
+// 마크다운 → HTML 변환
+function renderMarkdown(md) {
+  if (!md) return '';
+  let text = md;
+
+  // 코드블록 제거
+  text = text.replace(/```[\s\S]*?```/g, '');
+
+  // 테이블 변환 (| 파이프 테이블)
+  text = text.replace(/((?:^\|.+\|[ ]*\n)+)/gm, function(block) {
+    var rows = block.trim().split('\n');
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;">';
+    rows.forEach(function(row, i) {
+      // 구분선 행 (|---|---|) 건너뛰기
+      if (/^\|[\s\-:|]+\|$/.test(row)) return;
+      var cells = row.split('|').filter(function(c, idx, arr) { return idx > 0 && idx < arr.length - 1; });
+      var tag = i === 0 ? 'th' : 'td';
+      var cellStyle = 'padding:6px 8px;border:1px solid var(--card-border);text-align:left;';
+      if (i === 0) cellStyle += 'background:var(--green);color:#fff;font-weight:700;';
+      else if (i % 2 === 0) cellStyle += 'background:rgba(0,0,0,0.02);';
+      html += '<tr>';
+      cells.forEach(function(cell) {
+        html += '<' + tag + ' style="' + cellStyle + '">' + cell.trim() + '</' + tag + '>';
+      });
+      html += '</tr>';
+    });
+    html += '</table>';
+    return html;
+  });
+
+  // ### 제목
+  text = text.replace(/^### (.+)$/gm, '<h3 style="font-weight:700;font-size:15px;margin-top:20px;margin-bottom:8px;color:var(--text-1);">$1</h3>');
+  // ## 제목
+  text = text.replace(/^## (.+)$/gm, '<h3 style="font-weight:700;font-size:15px;margin-top:20px;margin-bottom:8px;color:var(--text-1);">$1</h3>');
+
+  // **볼드**
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  // - 리스트
+  text = text.replace(/^- (.+)$/gm, '<div style="display:flex;align-items:flex-start;gap:6px;padding:2px 0;"><span style="color:var(--green);flex-shrink:0;">&#8226;</span><span>$1</span></div>');
+
+  // 이모지 제거 (밤/낮 제외)
+  text = text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F680}-\u{1F6D2}]/gu, '');
+
+  // 빈 줄 정리 (3개 이상 연속 → 1개)
+  text = text.replace(/\n{3,}/g, '\n\n');
+
+  return text;
+}
+
+// answer 텍스트를 섹션 카드로 분리
+function renderAnswerCards(answer) {
+  if (!answer) return '';
+  var rendered = renderMarkdown(answer);
+
+  // "최종 확인" / "FACT_CHECK" 섹션 감지하여 카드화
+  rendered = rendered.replace(/(데이터 검증 확인|최종 확인[^\n]*|FACT_CHECK[^\n]*)/gi, function(match) {
+    return '___SECTION_BREAK___CARD_FINAL___';
+  });
+
+  // 섹션 분리 (### 기준)
+  var sections = rendered.split(/<h3 style="font-weight:700[^>]*>/);
+  var output = '';
+
+  if (sections.length > 1) {
+    sections.forEach(function(sec, i) {
+      if (i === 0 && sec.trim()) {
+        output += wrapCard(sec, '');
+        return;
+      }
+      // 제목 복원
+      var titleEnd = sec.indexOf('</h3>');
+      var title = '';
+      var body = sec;
+      if (titleEnd > -1) {
+        title = sec.substring(0, titleEnd);
+        body = sec.substring(titleEnd + 5);
+      }
+
+      // 유의사항/주의 감지
+      if (/유의사항|주의사항|참고사항|주의/i.test(title)) {
+        output += wrapWarningCard(title, body);
+      } else if (/데이터 검증 확인|최종 확인|FACT_CHECK/i.test(title)) {
+        output += wrapFinalCheckCard(title, body);
+      } else {
+        output += wrapCard(title, body);
+      }
+    });
+  } else {
+    output = wrapCard('', rendered);
+  }
+
+  return output;
+}
+
+function wrapCard(title, body) {
+  var html = '<div style="background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:16px;margin-bottom:12px;">';
+  if (title) {
+    html += '<h3 style="font-weight:700;font-size:15px;margin:0 0 10px 0;color:var(--text-1);">' + title + '</h3>';
+  }
+  html += '<div style="color:var(--text-2);font-size:13px;line-height:1.7;">' + body + '</div></div>';
+  return html;
+}
+
+function wrapWarningCard(title, body) {
+  return '<div style="background:rgba(220,38,38,0.06);border:1px solid var(--card-border);border-left:3px solid var(--red);border-radius:12px;padding:16px;margin-bottom:12px;">' +
+    '<h3 style="font-weight:700;font-size:15px;margin:0 0 10px 0;color:var(--text-1);">' + title + '</h3>' +
+    '<div style="color:var(--text-1);font-size:13px;line-height:1.7;">' + body + '</div></div>';
+}
+
+function wrapFinalCheckCard(title, body) {
+  // 리스트 아이템에 체크 아이콘 추가
+  var processed = body.replace(/<div style="display:flex[^>]*><span[^>]*>.*?<\/span><span>(.*?)<\/span><\/div>/g,
+    '<div style="display:flex;align-items:flex-start;gap:8px;padding:4px 0;"><i class="fas fa-check-circle" style="color:var(--green);margin-top:2px;flex-shrink:0;font-size:13px;"></i><span style="color:var(--text-1);font-size:13px;">$1</span></div>');
+  return '<div style="background:rgba(0,200,83,0.04);border:1px solid rgba(0,200,83,0.2);border-radius:12px;padding:16px;margin-bottom:12px;">' +
+    '<h3 style="font-weight:700;font-size:15px;margin:0 0 10px 0;color:var(--text-1);"><i class="fas fa-clipboard-check" style="color:var(--green);margin-right:6px;"></i>데이터 검증 확인</h3>' +
+    '<div style="line-height:1.7;">' + processed + '</div></div>';
 }
 
 // ==================== 관리자 기능 ====================
