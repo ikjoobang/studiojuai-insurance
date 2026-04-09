@@ -551,10 +551,10 @@ app.get('/', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>보험스캔 - ICD-10 진단코드 검색 + 의료영상 AI 판독</title>
-        <meta name="description" content="ICD-10 진단코드 검색, 생보 손보 전사 수술비 특약 비교, 의료영상 AI 판독(교육용)을 하나의 사이트에서 제공합니다.">
+        <title>보험스캔 - ICD-10 진단코드 검색 + 의료영상 판독</title>
+        <meta name="description" content="ICD-10 진단코드 검색, 생보 손보 전사 수술비 특약 비교, 의료영상 판독(교육용)을 하나의 사이트에서 제공합니다.">
         <meta property="og:title" content="보험스캔">
-        <meta property="og:description" content="ICD-10 진단코드 검색 + 의료영상 AI 판독">
+        <meta property="og:description" content="ICD-10 진단코드 검색 + 의료영상 판독">
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://studiojuai-insurance.pages.dev">
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2300C853'/><text x='50' y='68' font-size='55' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'>스</text></svg>">
@@ -781,10 +781,10 @@ app.get('/', (c) => {
                     <button onclick="toggleTheme()" class="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style="border: 1px solid var(--card-border);">
                         <i id="themeIcon" class="fas fa-moon t3"></i>
                     </button>
-                    <button onclick="showAdminPanel()" class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full t3 transition-all text-sm" style="border: 1px solid var(--card-border);">
+                    <a href="/admin?pw=xivix2026" class="hidden md:flex items-center gap-2 px-4 py-2 rounded-full t3 transition-all text-sm" style="border: 1px solid var(--card-border);">
                         <i class="fas fa-cog"></i>
                         <span>관리자</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </nav>
@@ -795,7 +795,7 @@ app.get('/', (c) => {
                 <!-- Badge -->
                 <div class="inline-flex items-center gap-2 badge rounded-full px-4 py-2 mb-8 fade-in-up">
                     <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    <span class="text-sm font-medium" style="color: var(--green);">AI 기반 보험 분석 + 의료영상 판독</span>
+                    <span class="text-sm font-medium" style="color: var(--green);">데이터 기반 보험 분석 + 영상 판독</span>
                 </div>
 
                 <!-- Hero Title -->
@@ -807,7 +807,7 @@ app.get('/', (c) => {
                 <!-- Hero Subtitle -->
                 <p class="hero-subtitle text-lg md:text-xl t3 mb-12 max-w-2xl mx-auto fade-in-up" style="animation-delay: 0.2s">
                     ICD-10 진단코드 검색, 생보 손보 전사 특약 비교,<br class="hidden md:block">
-                    의료영상 AI 판독(교육용)을 한곳에서
+                    의료영상 판독(교육용)을 한곳에서
                 </p>
 
                 <!-- Main Tab Buttons -->
@@ -828,7 +828,7 @@ app.get('/', (c) => {
                             <i class="fas fa-search mr-2"></i>ICD-10 진단코드
                         </button>
                         <button id="tabAI" onclick="switchTab('ai')" class="tab-btn flex-1 py-3 px-4 rounded-xl text-sm font-semibold">
-                            <i class="fas fa-robot mr-2"></i>AI 보험 분석
+                            <i class="fas fa-robot mr-2"></i>보험 데이터 분석
                         </button>
                     </div>
 
@@ -863,7 +863,7 @@ app.get('/', (c) => {
                                 autocomplete="off"
                             >
                             <button onclick="searchWithGPT()" class="absolute right-3 top-1/2 -translate-y-1/2 btn-primary px-6 py-3 rounded-xl text-white font-semibold">
-                                <i class="fas fa-robot mr-2"></i>AI 분석
+                                <i class="fas fa-robot mr-2"></i>데이터 분석
                             </button>
                         </div>
                     </div>
@@ -933,7 +933,7 @@ app.get('/', (c) => {
 
                     <!-- Analyze Button -->
                     <button id="analyzeImageBtn" onclick="analyzeImage()" class="w-full btn-primary py-4 rounded-xl text-white font-semibold" disabled>
-                        <i class="fas fa-microscope mr-2"></i>AI 영상 분석 시작
+                        <i class="fas fa-microscope mr-2"></i>영상 데이터 분석 시작
                     </button>
 
                     <!-- Analysis Results -->
@@ -995,11 +995,11 @@ app.get('/', (c) => {
                         <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background: rgba(0,200,83,0.1);">
                             <i class="fas fa-bolt text-2xl" style="color: var(--green);"></i>
                         </div>
-                        <h3 class="text-xl font-bold t1 mb-3">실시간 AI 분석</h3>
-                        <p class="t3 leading-relaxed">AI 하이브리드 검색으로 최신 보험 정보를 실시간 분석합니다.</p>
+                        <h3 class="text-xl font-bold t1 mb-3">실시간 데이터 분석</h3>
+                        <p class="t3 leading-relaxed">보험 데이터 검증 시스템으로 최신 보험 정보를 실시간 분석합니다.</p>
                         <ul class="mt-4 space-y-2">
                             <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check" style="color: var(--green);"></i>실시간 웹 검색</li>
-                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check" style="color: var(--green);"></i>AI 실시간 분석</li>
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check" style="color: var(--green);"></i>실시간 데이터 분석</li>
                         </ul>
                     </div>
 
@@ -1019,10 +1019,10 @@ app.get('/', (c) => {
                         <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style="background: rgba(139,92,246,0.1);">
                             <i class="fas fa-x-ray text-purple-500 text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold t1 mb-3">의료영상 AI 판독</h3>
-                        <p class="t3 leading-relaxed">X-ray, CT, MRI 영상을 AI가 분석하여 교육용 참고 소견을 제공합니다.</p>
+                        <h3 class="text-xl font-bold t1 mb-3">의료영상 판독</h3>
+                        <p class="t3 leading-relaxed">X-ray, CT, MRI 영상을 데이터 분석 시스템이 분석하여 교육용 참고 소견을 제공합니다.</p>
                         <ul class="mt-4 space-y-2">
-                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-purple-500"></i>AI 영상 분석</li>
+                            <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-purple-500"></i>영상 데이터 분석</li>
                             <li class="flex items-center gap-2 t3 text-sm"><i class="fas fa-check text-purple-500"></i>교육용 참고 자료</li>
                         </ul>
                     </div>
@@ -1090,14 +1090,14 @@ app.get('/', (c) => {
             </div>
         </section>
 
-        <!-- AI Disclaimer -->
+        <!-- Data Analysis Notice -->
         <section class="py-8 px-4" style="background: rgba(0,200,83,0.03); border-top: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border);">
             <div class="container-main">
                 <div class="flex items-start gap-4">
                     <i class="fas fa-info-circle text-xl mt-1" style="color: var(--green);"></i>
                     <div>
-                        <p class="font-semibold t1 mb-1">AI 분석 안내</p>
-                        <p class="t3 text-sm leading-relaxed">본 서비스의 모든 AI 분석 결과(보험 특약 분석, 의료영상 판독)는 교육용 참고 자료이며 실제 진단이나 보험 심사를 대체하지 않습니다. 정확한 판단은 전문 의료진 및 보험 전문가와 상담하세요.</p>
+                        <p class="font-semibold t1 mb-1">데이터 분석 안내</p>
+                        <p class="t3 text-sm leading-relaxed">본 서비스의 모든 데이터 검증 결과(보험 특약 분석, 의료영상 판독)는 교육용 참고 자료이며 실제 진단이나 보험 심사를 대체하지 않습니다. 정확한 판단은 전문 의료진 및 보험 전문가와 상담하세요.</p>
                     </div>
                 </div>
             </div>
@@ -1106,7 +1106,7 @@ app.get('/', (c) => {
         <!-- Footer -->
         <footer class="py-12 px-4" style="border-top: 1px solid var(--card-border);">
             <div class="container-main">
-                <div class="flex flex-col items-center gap-8">
+                <div class="flex flex-col items-center gap-6">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: #00C853;">
                             <span class="text-white font-bold text-lg">스</span>
@@ -1114,125 +1114,109 @@ app.get('/', (c) => {
                         <span class="text-xl font-bold t1">보험스캔</span>
                     </div>
 
-                    <!-- Family Links -->
-                    <div class="grid grid-cols-2 gap-4 w-full max-w-md">
-                        <a href="https://bohumhaja.com/" target="_blank" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold t1 transition-all text-sm" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
-                            <i class="fas fa-shield-alt" style="color: var(--green);"></i>
-                            보험하자
+                    <!-- Family Links 8 cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-2xl">
+                        <a href="https://bohumhaja.com/" target="_blank" rel="noopener" class="flex flex-col items-center gap-2 p-4 rounded-xl t1 transition-all text-center" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
+                            <i class="fas fa-users" style="color: var(--green);"></i>
+                            <span class="font-semibold text-sm">보험하자</span>
+                            <span class="t3 text-xs">리크루팅</span>
                         </a>
-                        <a href="https://www.in-sns.com/" target="_blank" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold t1 transition-all text-sm" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
-                            <i class="fas fa-comments" style="color: var(--green);"></i>
-                            보험소통
+                        <a href="https://www.in-sns.com/" target="_blank" rel="noopener" class="flex flex-col items-center gap-2 p-4 rounded-xl t1 transition-all text-center" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
+                            <i class="fas fa-user-circle" style="color: var(--green);"></i>
+                            <span class="font-semibold text-sm">보험소통</span>
+                            <span class="t3 text-xs">개인프로필</span>
+                        </a>
+                        <a href="https://insuranc.co.kr/" target="_blank" rel="noopener" class="flex flex-col items-center gap-2 p-4 rounded-xl t1 transition-all text-center" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
+                            <i class="fas fa-search-dollar" style="color: var(--green);"></i>
+                            <span class="font-semibold text-sm">보험판독</span>
+                            <span class="t3 text-xs">실손분석</span>
+                        </a>
+                        <a href="https://insuranc.kr/" target="_blank" rel="noopener" class="flex flex-col items-center gap-2 p-4 rounded-xl t1 transition-all text-center" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
+                            <i class="fas fa-calculator" style="color: var(--green);"></i>
+                            <span class="font-semibold text-sm">보험수당</span>
+                            <span class="t3 text-xs">수수료 계산기</span>
+                        </a>
+                        <a href="https://insurance-content-master.pages.dev" target="_blank" rel="noopener" class="flex flex-col items-center gap-2 p-4 rounded-xl t1 transition-all text-center" style="background: var(--card); border: 1px solid var(--card-border);" onmouseover="this.style.borderColor='rgba(0,200,83,0.4)'" onmouseout="this.style.borderColor=''">
+                            <i class="fas fa-store" style="color: var(--green);"></i>
+                            <span class="font-semibold text-sm">보험카페</span>
+                            <span class="t3 text-xs">카페 Q&A</span>
+                        </a>
+                        <a href="#" onclick="event.preventDefault();alert('준비 중인 서비스입니다.')" class="flex flex-col items-center gap-2 p-4 rounded-xl t1 transition-all text-center opacity-50 cursor-not-allowed" style="background: var(--card); border: 1px solid var(--card-border);">
+                            <i class="fas fa-pen-fancy" style="color: var(--text-3);"></i>
+                            <span class="font-semibold text-sm">보험블로</span>
+                            <span class="t3 text-xs">블로그 자동화</span>
+                        </a>
+                        <span class="flex flex-col items-center gap-2 p-4 rounded-xl t1 text-center" style="background: rgba(0,200,83,0.04); border: 1px solid rgba(0,200,83,0.2);">
+                            <i class="fas fa-barcode" style="color: var(--green);"></i>
+                            <span class="font-semibold text-sm">보험스캔</span>
+                            <span class="t3 text-xs">진단코드 판독</span>
+                        </span>
+                        <a href="#" onclick="event.preventDefault();alert('준비 중인 서비스입니다.')" class="flex flex-col items-center gap-2 p-4 rounded-xl t1 transition-all text-center opacity-50 cursor-not-allowed" style="background: var(--card); border: 1px solid var(--card-border);">
+                            <i class="fas fa-bullhorn" style="color: var(--text-3);"></i>
+                            <span class="font-semibold text-sm">보험마켓</span>
+                            <span class="t3 text-xs">마케팅 대행</span>
                         </a>
                     </div>
 
-                    <div class="pt-4 w-full text-center" style="border-top: 1px solid var(--card-border);">
-                        <p class="t3 text-sm">&copy; 2025 보험스캔. All rights reserved.</p>
+                    <!-- Legal -->
+                    <div class="w-full text-center space-y-2 pt-4" style="border-top: 1px solid var(--card-border);">
+                        <div class="flex flex-wrap justify-center gap-3 t3 text-xs">
+                            <a href="#" onclick="event.preventDefault();document.getElementById('termsModal').classList.remove('hidden')" class="hover:underline">이용약관</a>
+                            <span>|</span>
+                            <a href="#" onclick="event.preventDefault();document.getElementById('privacyModal').classList.remove('hidden')" class="hover:underline">개인정보처리방침</a>
+                            <span>|</span>
+                            <a href="#" onclick="event.preventDefault();document.getElementById('disclaimerModal').classList.remove('hidden')" class="hover:underline">면책조항</a>
+                        </div>
+                        <p class="t3 text-xs">&copy; 2026 | 대표 : 방익주 | support@xivix.kr</p>
                     </div>
                 </div>
             </div>
         </footer>
 
-        <!-- Admin Modal -->
-        <div id="adminModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="glass-card rounded-3xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <!-- Terms Modal -->
+        <div id="termsModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+            <div class="glass-card rounded-2xl p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold t1">관리자 패널</h2>
-                    <button onclick="closeAdminPanel()" class="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style="border: 1px solid var(--card-border);">
-                        <i class="fas fa-times t3"></i>
-                    </button>
+                    <h2 class="text-xl font-bold t1">이용약관</h2>
+                    <button onclick="document.getElementById('termsModal').classList.add('hidden')" class="w-10 h-10 rounded-full flex items-center justify-center" style="border: 1px solid var(--card-border);"><i class="fas fa-times t3"></i></button>
                 </div>
-
-                <div class="space-y-3">
-                    <button onclick="showPDFUpload()" class="w-full flex items-center gap-4 p-4 rounded-xl transition-colors text-left" style="background: rgba(220,38,38,0.06);">
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(220,38,38,0.1);">
-                            <i class="fas fa-file-pdf" style="color: var(--red);"></i>
-                        </div>
-                        <div>
-                            <div class="font-semibold t1">PDF 업로드</div>
-                            <div class="text-sm t3">보험 약관 분석</div>
-                        </div>
-                    </button>
-
-                    <button onclick="syncHIRAData()" class="w-full flex items-center gap-4 p-4 rounded-xl transition-colors text-left" style="background: rgba(59,130,246,0.06);">
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(59,130,246,0.1);">
-                            <i class="fas fa-database text-blue-500"></i>
-                        </div>
-                        <div>
-                            <div class="font-semibold t1">HIRA 동기화</div>
-                            <div class="text-sm t3">건강보험심사평가원 데이터</div>
-                        </div>
-                    </button>
-
-                    <button onclick="triggerAutoUpdate()" class="w-full flex items-center gap-4 p-4 rounded-xl transition-colors text-left" style="background: rgba(0,200,83,0.06);">
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(0,200,83,0.1);">
-                            <i class="fas fa-sync-alt" style="color: var(--green);"></i>
-                        </div>
-                        <div>
-                            <div class="font-semibold t1">자동 업데이트</div>
-                            <div class="text-sm t3">데이터 갱신</div>
-                        </div>
-                    </button>
+                <div class="t2 text-sm leading-relaxed space-y-4">
+                    <p>제1조 (목적) 본 약관은 보험스캔(이하 "서비스")의 이용조건 및 절차, 기타 필요한 사항을 규정합니다.</p>
+                    <p>제2조 (서비스 내용) 본 서비스는 ICD-10 진단코드 검색 및 보험 특약 비교 정보를 제공하며, 모든 분석 결과는 교육용 참고 자료입니다.</p>
+                    <p>제3조 (면책) 서비스에서 제공하는 정보는 참고용이며, 실제 보험 청구, 진단, 치료의 근거로 사용할 수 없습니다.</p>
+                    <p>제4조 (저작권) 서비스에 포함된 모든 콘텐츠의 저작권은 XIVIX에 있습니다.</p>
                 </div>
             </div>
         </div>
 
-        <!-- PDF Upload Modal -->
-        <div id="pdfUploadModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="glass-card rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <!-- Privacy Modal -->
+        <div id="privacyModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+            <div class="glass-card rounded-2xl p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold t1">PDF 업로드</h2>
-                    <button onclick="closePDFUpload()" class="w-10 h-10 rounded-full flex items-center justify-center transition-colors" style="border: 1px solid var(--card-border);">
-                        <i class="fas fa-times t3"></i>
-                    </button>
+                    <h2 class="text-xl font-bold t1">개인정보처리방침</h2>
+                    <button onclick="document.getElementById('privacyModal').classList.add('hidden')" class="w-10 h-10 rounded-full flex items-center justify-center" style="border: 1px solid var(--card-border);"><i class="fas fa-times t3"></i></button>
                 </div>
+                <div class="t2 text-sm leading-relaxed space-y-4">
+                    <p>제1조 (수집 항목) 본 서비스는 검색어 입력 정보 외에 개인정보를 수집하지 않습니다.</p>
+                    <p>제2조 (이용 목적) 수집된 검색 데이터는 서비스 품질 향상 및 통계 분석 목적으로만 활용됩니다.</p>
+                    <p>제3조 (보유 기간) 검색 로그는 서비스 운영 기간 동안 보관되며, 요청 시 즉시 삭제됩니다.</p>
+                    <p>제4조 (문의) 개인정보 관련 문의: support@xivix.kr</p>
+                </div>
+            </div>
+        </div>
 
-                <div class="space-y-6">
-                    <div class="p-4 rounded-xl" style="background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15);">
-                        <h3 class="font-semibold text-blue-500 mb-2">
-                            <i class="fas fa-info-circle mr-2"></i>사용 방법
-                        </h3>
-                        <ol class="text-sm t2 space-y-1">
-                            <li>1. 보험사 선택</li>
-                            <li>2. 보험사 약관 PDF 파일 업로드</li>
-                            <li>3. AI가 PDF를 분석하여 수술 코드별 보험 등급 추출</li>
-                        </ol>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium t2 mb-2">보험사 선택</label>
-                        <select id="insuranceCompanySelect" class="w-full px-4 py-3 rounded-xl search-input">
-                            <option value="">보험사를 선택하세요</option>
-                            <option value="삼성화재">삼성화재 (111대)</option>
-                            <option value="현대해상">현대해상 (119대)</option>
-                            <option value="DB손보">DB손보 (119대)</option>
-                            <option value="KB손보">KB손보 (112대)</option>
-                            <option value="농협손보">농협손보 (144대)</option>
-                            <option value="한화손보">한화손보 (124대)</option>
-                            <option value="메리츠화재">메리츠화재 (119대)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium t2 mb-2">PDF 파일</label>
-                        <input type="file" id="pdfFileInput" accept=".pdf" class="w-full px-4 py-3 rounded-xl search-input file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white file:cursor-pointer">
-                    </div>
-
-                    <button onclick="uploadAndAnalyzePDF()" class="w-full btn-primary py-4 rounded-xl text-white font-semibold">
-                        <i class="fas fa-upload mr-2"></i>PDF 업로드 및 분석
-                    </button>
-
-                    <div id="pdfAnalysisProgress" class="hidden">
-                        <div class="flex items-center gap-4 p-4 rounded-xl" style="background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.2);">
-                            <div class="spinner"></div>
-                            <div>
-                                <div class="font-semibold" style="color: #ca8a04;">PDF 분석 중...</div>
-                                <div id="pdfAnalysisStatus" class="text-sm t3">업로드 중입니다...</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="pdfAnalysisResult" class="hidden"></div>
+        <!-- Disclaimer Modal -->
+        <div id="disclaimerModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+            <div class="glass-card rounded-2xl p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold t1">면책조항</h2>
+                    <button onclick="document.getElementById('disclaimerModal').classList.add('hidden')" class="w-10 h-10 rounded-full flex items-center justify-center" style="border: 1px solid var(--card-border);"><i class="fas fa-times t3"></i></button>
+                </div>
+                <div class="t2 text-sm leading-relaxed space-y-4">
+                    <p>1. 본 서비스에서 제공하는 모든 분석 결과(진단코드 검색, 보험 특약 비교, 영상 분석)는 교육용 참고 자료이며, 실제 진단, 치료, 보험 청구의 근거가 될 수 없습니다.</p>
+                    <p>2. 정확한 진단 및 보험 관련 판단은 반드시 전문 의료진 및 보험 전문가와 상담하시기 바랍니다.</p>
+                    <p>3. 서비스 이용으로 발생한 어떠한 손해에 대해서도 책임을 지지 않습니다.</p>
+                    <p>4. 의료영상 분석 결과는 참고 자료이며, 실제 판독은 반드시 전문의에게 받아야 합니다.</p>
                 </div>
             </div>
         </div>
@@ -1241,7 +1225,7 @@ app.get('/', (c) => {
         <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
             <div class="text-center">
                 <div class="spinner mx-auto mb-4"></div>
-                <p class="text-white font-medium">AI가 분석 중입니다...</p>
+                <p class="text-white font-medium">분석 중입니다...</p>
                 <p class="text-gray-400 text-sm mt-2">잠시만 기다려주세요</p>
             </div>
         </div>
@@ -1268,6 +1252,16 @@ app.get('/', (c) => {
     </body>
     </html>
   `)
+})
+
+// ==================== 관리자 페이지 (별도 라우트) ====================
+
+app.get('/admin', (c) => {
+  const pw = c.req.query('pw')
+  if (pw !== 'xivix2026') {
+    return c.html('<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>관리자</title></head><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#FAFAF8;"><div style="text-align:center;"><h2 style="color:#111;">접근 권한이 없습니다</h2></div></body></html>')
+  }
+  return c.html(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>관리자 - 보험스캔</title><script src="https://cdn.tailwindcss.com"></script><link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"><style>body{font-family:-apple-system,sans-serif;background:#FAFAF8;color:#111;}</style></head><body class="min-h-screen p-8"><div class="max-w-4xl mx-auto"><div class="flex items-center justify-between mb-8"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#00C853;"><span class="text-white font-bold text-lg">스</span></div><h1 class="text-2xl font-bold">보험스캔 관리자</h1></div><a href="/" class="text-sm text-gray-500"><i class="fas fa-arrow-left mr-1"></i>메인으로</a></div><div class="space-y-4"><div class="bg-white rounded-2xl p-6 border border-gray-100"><h2 class="text-lg font-bold mb-4">관리자 메뉴</h2><div class="space-y-3"><a href="#" onclick="event.preventDefault();fetch('/api/admin/hira-sync?pw=xivix2026',{method:'POST'}).then(r=>r.json()).then(d=>alert(d.success?'동기화 완료: '+d.saved+'개':'실패')).catch(()=>alert('오류'))" class="w-full flex items-center gap-4 p-4 rounded-xl text-left block" style="background:rgba(59,130,246,0.06);"><div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(59,130,246,0.1);"><i class="fas fa-database text-blue-500"></i></div><div><div class="font-semibold">HIRA 동기화</div><div class="text-sm text-gray-500">건강보험심사평가원 데이터</div></div></a></div></div></div></div></body></html>`)
 })
 
 // ==================== 자동 업데이트 API ====================

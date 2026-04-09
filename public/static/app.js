@@ -424,12 +424,13 @@ async function searchWithGPT() {
     if (result.success) {
       displayGPTResults(result, query);
     } else {
-      alert('검색 오류: ' + (result.error || '알 수 없는 오류'));
+      console.error('검색 오류:', result.error);
+      alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
     }
   } catch (error) {
     document.getElementById('loadingOverlay').classList.add('hidden');
     console.error('GPT search error:', error);
-    alert('검색 중 오류가 발생했습니다: ' + error.message);
+    alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
   }
 }
 
@@ -439,7 +440,7 @@ function displayGPTResults(result, query) {
   const queryDisplay = document.getElementById('resultsQuery');
   const downloadButtons = document.getElementById('downloadButtons');
 
-  queryDisplay.textContent = '"' + query + '" AI 분석 결과';
+  queryDisplay.textContent = '"' + query + '" 데이터 검증 결과';
   resultsSection.classList.remove('hidden');
   downloadButtons.classList.remove('hidden');
   currentReport = { query, ...result };
@@ -459,7 +460,7 @@ function displayGPTResults(result, query) {
               <i class="fas fa-database mr-1"></i>DB: ${result.stats.fromDB}개
             </span>
             <span class="px-3 py-1 rounded-full text-sm font-semibold" style="background: rgba(249,115,22,0.1); color: #f97316;">
-              <i class="fas fa-robot mr-1"></i>AI: ${result.stats.fromGPT}개
+              <i class="fas fa-robot mr-1"></i>분석: ${result.stats.fromGPT}개
             </span>
             <span class="px-3 py-1 rounded-full text-sm font-semibold" style="background: rgba(0,0,0,0.05); color: var(--text-3);">
               <i class="fas fa-bolt mr-1"></i>${result.stats.searchTime || 0}ms
@@ -482,7 +483,7 @@ function displayGPTResults(result, query) {
                 <span class="px-3 py-1 rounded-lg font-mono text-sm" style="background: rgba(0,200,83,0.1); color: var(--green);">${item.code || 'N/A'}</span>
                 ${item.dataSource === 'database' ?
                   `<span class="px-3 py-1 rounded-full text-xs font-semibold" style="background: rgba(0,200,83,0.1); color: var(--green);"><i class="fas fa-database mr-1"></i>DB 데이터</span>` :
-                  `<span class="px-3 py-1 rounded-full text-xs font-semibold" style="background: rgba(249,115,22,0.1); color: #f97316;"><i class="fas fa-robot mr-1"></i>AI 분석</span>`
+                  `<span class="px-3 py-1 rounded-full text-xs font-semibold" style="background: rgba(249,115,22,0.1); color: #f97316;"><i class="fas fa-robot mr-1"></i>데이터 분석</span>`
                 }
               </div>
             </div>
@@ -585,8 +586,8 @@ function displayGPTResults(result, query) {
             <i class="fas fa-robot text-xl" style="color: var(--green);"></i>
           </div>
           <div>
-            <h3 class="text-xl font-bold t1">AI 분석 결과</h3>
-            <p class="t3 text-sm">AI 하이브리드 검색</p>
+            <h3 class="text-xl font-bold t1">데이터 검증 결과</h3>
+            <p class="t3 text-sm">보험 데이터 검증 시스템</p>
           </div>
         </div>
         <div class="prose max-w-none">
@@ -651,7 +652,7 @@ async function analyzeImage() {
 
   const btn = document.getElementById('analyzeImageBtn');
   btn.disabled = true;
-  btn.innerHTML = '<div class="spinner inline-block mr-3" style="width:20px;height:20px;border-width:2px;vertical-align:middle;"></div>AI 분석 중...';
+  btn.innerHTML = '<div class="spinner inline-block mr-3" style="width:20px;height:20px;border-width:2px;vertical-align:middle;"></div>분석 중...';
 
   const formData = new FormData();
   formData.append('image', selectedImageFile);
@@ -670,14 +671,15 @@ async function analyzeImage() {
     if (result.success && result.analysis) {
       displayImageAnalysis(result.analysis, result.examType);
     } else {
-      alert('분석 실패: ' + (result.error || '알 수 없는 오류'));
+      console.error('분석 실패:', result.error);
+      alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
     }
   } catch (error) {
     console.error('Image analysis error:', error);
-    alert('영상 분석 중 오류가 발생했습니다: ' + error.message);
+    alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-microscope mr-2"></i>AI 영상 분석 시작';
+    btn.innerHTML = '<i class="fas fa-microscope mr-2"></i>영상 데이터 분석 시작';
   }
 }
 
@@ -702,7 +704,7 @@ function displayImageAnalysis(analysis, examType) {
           <i class="fas fa-file-medical" style="color: var(--green);"></i>
         </div>
         <div>
-          <h3 class="text-lg font-bold t1">AI 영상 판독 결과</h3>
+          <h3 class="text-lg font-bold t1">영상 데이터 분석 결과</h3>
           <p class="text-xs t3">${examType ? examType + ' | ' : ''}${new Date().toLocaleString('ko-KR')}${analysis.confidence ? ' | 신뢰도: ' + analysis.confidence : ''}</p>
         </div>
       </div>
@@ -875,28 +877,17 @@ function getAdminHeaders() {
 }
 
 function showAdminPanel() {
-  const password = prompt('관리자 비밀번호를 입력하세요:');
-
-  if (password !== ADMIN_PASSWORD) {
-    alert('비밀번호가 틀렸습니다.');
-    return;
-  }
-
-  adminAuthenticated = true;
-  document.getElementById('adminModal').classList.remove('hidden');
+  window.location.href = '/admin?pw=' + ADMIN_PASSWORD;
 }
 
 function closeAdminPanel() {
-  document.getElementById('adminModal').classList.add('hidden');
 }
 
 function showPDFUpload() {
-  document.getElementById('adminModal').classList.add('hidden');
-  document.getElementById('pdfUploadModal').classList.remove('hidden');
+  window.location.href = '/admin?pw=' + ADMIN_PASSWORD;
 }
 
 function closePDFUpload() {
-  document.getElementById('pdfUploadModal').classList.add('hidden');
 }
 
 async function uploadAndAnalyzePDF() {
@@ -939,11 +930,13 @@ async function uploadAndAnalyzePDF() {
       `;
       document.getElementById('pdfAnalysisResult').classList.remove('hidden');
     } else {
-      alert('PDF 분석 실패: ' + result.error);
+      console.error('PDF 분석 실패:', result.error);
+      alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
     }
   } catch (error) {
     document.getElementById('pdfAnalysisProgress').classList.add('hidden');
-    alert('오류가 발생했습니다: ' + error.message);
+    console.error('PDF 오류:', error);
+    alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
   }
 }
 
@@ -966,11 +959,13 @@ async function syncHIRAData() {
     if (result.success) {
       alert('HIRA API 동기화 완료!\n\n총 ' + result.total + '개 코드, 신규 저장: ' + result.saved + '개');
     } else {
-      alert('동기화 실패: ' + result.error);
+      console.error('동기화 실패:', result.error);
+      alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
     }
   } catch (error) {
     document.getElementById('loadingOverlay').classList.add('hidden');
-    alert('오류가 발생했습니다: ' + error.message);
+    console.error('HIRA 오류:', error);
+    alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
   }
 }
 
@@ -997,10 +992,12 @@ async function triggerAutoUpdate() {
       alert('자동 업데이트 완료!\n\n추가된 수술: ' + result.surgeries_added + '개\n추가된 특약: ' + result.benefits_added + '개');
       location.reload();
     } else {
-      alert('업데이트 실패: ' + result.error);
+      console.error('업데이트 실패:', result.error);
+      alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
     }
   } catch (error) {
     document.getElementById('loadingOverlay').classList.add('hidden');
-    alert('오류가 발생했습니다: ' + error.message);
+    console.error('업데이트 오류:', error);
+    alert('검색 결과를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.');
   }
 }
