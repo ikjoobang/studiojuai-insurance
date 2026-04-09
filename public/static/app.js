@@ -871,26 +871,50 @@ function formatCurrency(amount) {
 // 마크다운 → HTML 변환
 function renderMarkdown(md) {
   if (!md) return '';
-  let text = md;
+  var text = md;
 
-  // 코드블록 제거
+  // 코드블록 제거 (```...```)
   text = text.replace(/```[\s\S]*?```/g, '');
 
-  // 테이블 변환 (| 파이프 테이블)
-  text = text.replace(/((?:^\|.+\|[ ]*\n)+)/gm, function(block) {
+  // 인라인 코드 제거 (`...`)
+  text = text.replace(/`([^`]+)`/g, '$1');
+
+  // 테이블 변환 (| 파이프 테이블) — 연속된 |행을 하나의 테이블로 묶음
+  text = text.replace(/((?:^\|[^\n]*\|[ \t]*$\n?)+)/gm, function(block) {
     var rows = block.trim().split('\n');
-    var html = '<table style="width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;">';
-    rows.forEach(function(row, i) {
+    var tableRows = [];
+    rows.forEach(function(row) {
+      row = row.trim();
+      if (!row || !row.startsWith('|')) return;
       // 구분선 행 (|---|---|) 건너뛰기
       if (/^\|[\s\-:|]+\|$/.test(row)) return;
-      var cells = row.split('|').filter(function(c, idx, arr) { return idx > 0 && idx < arr.length - 1; });
-      var tag = i === 0 ? 'th' : 'td';
+      tableRows.push(row);
+    });
+    if (tableRows.length === 0) return '';
+
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;">';
+    tableRows.forEach(function(row, i) {
+      var cells = row.split('|');
+      // 첫번째와 마지막 빈 요소 제거
+      if (cells.length > 0 && cells[0].trim() === '') cells.shift();
+      if (cells.length > 0 && cells[cells.length - 1].trim() === '') cells.pop();
+      if (cells.length === 0) return;
+
+      var isFirst = (i === 0);
+      // 첫 행이 숫자/특수문자 위주면 헤더가 아님 — 이전 행 기준
+      var tag = isFirst ? 'th' : 'td';
       var cellStyle = 'padding:6px 8px;border:1px solid var(--card-border);text-align:left;';
-      if (i === 0) cellStyle += 'background:var(--green);color:#fff;font-weight:700;';
-      else if (i % 2 === 0) cellStyle += 'background:rgba(0,0,0,0.02);';
+      if (isFirst) {
+        cellStyle += 'background:var(--green);color:#fff;font-weight:700;';
+      } else if (i % 2 === 0) {
+        cellStyle += 'background:var(--chip-bg,rgba(0,0,0,0.02));';
+      }
       html += '<tr>';
       cells.forEach(function(cell) {
-        html += '<' + tag + ' style="' + cellStyle + '">' + cell.trim() + '</' + tag + '>';
+        var c = cell.trim();
+        // 셀 안의 **볼드** 처리
+        c = c.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        html += '<' + tag + ' style="' + cellStyle + '">' + c + '</' + tag + '>';
       });
       html += '</tr>';
     });
@@ -903,16 +927,19 @@ function renderMarkdown(md) {
   // ## 제목
   text = text.replace(/^## (.+)$/gm, '<h3 style="font-weight:700;font-size:15px;margin-top:20px;margin-bottom:8px;color:var(--text-1);">$1</h3>');
 
-  // **볼드**
+  // **볼드** (테이블 안에서 이미 처리됨, 여기서는 남은 것)
   text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
   // - 리스트
   text = text.replace(/^- (.+)$/gm, '<div style="display:flex;align-items:flex-start;gap:6px;padding:2px 0;"><span style="color:var(--green);flex-shrink:0;">&#8226;</span><span>$1</span></div>');
 
-  // 이모지 제거 (밤/낮 제외)
+  // 이모지 제거
   text = text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F680}-\u{1F6D2}]/gu, '');
 
-  // 빈 줄 정리 (3개 이상 연속 → 1개)
+  // 내부 파싱 토큰 제거 (___로 시작/끝나는 문자열)
+  text = text.replace(/___[A-Z_]+___/g, '');
+
+  // 빈 줄 정리
   text = text.replace(/\n{3,}/g, '\n\n');
 
   return text;
@@ -923,44 +950,52 @@ function renderAnswerCards(answer) {
   if (!answer) return '';
   var rendered = renderMarkdown(answer);
 
-  // "최종 확인" / "FACT_CHECK" 섹션 감지하여 카드화
-  rendered = rendered.replace(/(데이터 검증 확인|최종 확인[^\n]*|FACT_CHECK[^\n]*)/gi, function(match) {
-    return '___SECTION_BREAK___CARD_FINAL___';
-  });
-
-  // 섹션 분리 (### 기준)
-  var sections = rendered.split(/<h3 style="font-weight:700[^>]*>/);
+  // 섹션 분리 (<h3> 기준)
+  var sections = rendered.split(/(<h3 style="font-weight:700[^>]*>[^<]*<\/h3>)/);
   var output = '';
+  var currentTitle = '';
+  var currentBody = '';
 
-  if (sections.length > 1) {
-    sections.forEach(function(sec, i) {
-      if (i === 0 && sec.trim()) {
-        output += wrapCard(sec, '');
-        return;
+  for (var i = 0; i < sections.length; i++) {
+    var h3Match = sections[i].match(/<h3[^>]*>([^<]*)<\/h3>/);
+    if (h3Match) {
+      // 이전 섹션 출력
+      if (currentTitle || currentBody.trim()) {
+        output += buildCard(currentTitle, currentBody);
       }
-      // 제목 복원
-      var titleEnd = sec.indexOf('</h3>');
-      var title = '';
-      var body = sec;
-      if (titleEnd > -1) {
-        title = sec.substring(0, titleEnd);
-        body = sec.substring(titleEnd + 5);
-      }
+      currentTitle = h3Match[1];
+      currentBody = '';
+    } else {
+      currentBody += sections[i];
+    }
+  }
+  // 마지막 섹션
+  if (currentTitle || currentBody.trim()) {
+    output += buildCard(currentTitle, currentBody);
+  }
 
-      // 유의사항/주의 감지
-      if (/유의사항|주의사항|참고사항|주의/i.test(title)) {
-        output += wrapWarningCard(title, body);
-      } else if (/데이터 검증 확인|최종 확인|FACT_CHECK/i.test(title)) {
-        output += wrapFinalCheckCard(title, body);
-      } else {
-        output += wrapCard(title, body);
-      }
-    });
-  } else {
-    output = wrapCard('', rendered);
+  // 내용이 하나도 없으면 전체를 카드로
+  if (!output.trim()) {
+    output = buildCard('', rendered);
   }
 
   return output;
+}
+
+function buildCard(title, body) {
+  var t = title.trim();
+  var b = body.trim();
+  if (!t && !b) return '';
+
+  // 유의사항/주의 감지
+  if (/유의사항|주의사항|참고사항|중요.*주의/i.test(t)) {
+    return wrapWarningCard(t, b);
+  }
+  // 최종 확인 / FACT_CHECK 감지
+  if (/데이터 검증 확인|최종 확인|FACT.?CHECK/i.test(t)) {
+    return wrapFinalCheckCard(t, b);
+  }
+  return wrapCard(t, b);
 }
 
 function wrapCard(title, body) {
